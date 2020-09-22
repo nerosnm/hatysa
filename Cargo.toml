@@ -1,5 +1,5 @@
 [package]
-name = "sketchify-bot"
+name = "sketchify"
 version = "0.1.0"
 authors = ["Søren Mortensen <soren@neros.dev>"]
 edition = "2018"
@@ -8,3 +8,9 @@ publish = false
 [dependencies]
 eyre = "^0.6"
 reqwest = "^0.9"
+tokio = { version = "0.2", features = ["macros"] }
+
+[dependencies.serenity]
+version = "0.9.0-rc.1"
+default-features = false
+features = ["client", "gateway", "rustls_backend", "model"]
