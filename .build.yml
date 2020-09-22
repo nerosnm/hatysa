@@ -1,0 +1,27 @@
+image: archlinux
+packages:
+    - rustup
+    - rsync
+sources:
+    - git@git.sr.ht:~nerosnm/sketchify
+environment:
+  deploy: ***REMOVED***
+secrets:
+    - c449c5a5-a533-445a-a182-b0fac588cf98
+tasks:
+    - install: |
+        rustup install stable
+    - build: |
+        cd sketchify
+        cargo build --release
+    - deploy: |
+        cd sketchify
+        echo "StrictHostKeyChecking=no" >> ~/.ssh/config
+        head=$(git rev-parse HEAD)
+        if [ $head = "$(git rev-parse origin/master)" ]; then \
+            echo "Deploying from branch master on commit $head to ***REMOVED***"
+            rsync -rP --delete target/release/sketchify $deploy:***REMOVED***
+        else
+            echo "Not deploying on commit $head"
+            complete-build
+        fi
