@@ -1,0 +1,10 @@
+[package]
+name = "sketchify-bot"
+version = "0.1.0"
+authors = ["Søren Mortensen <soren@neros.dev>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+eyre = "^0.6"
+reqwest = "^0.9"
