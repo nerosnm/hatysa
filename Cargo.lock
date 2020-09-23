@@ -603,6 +603,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00d63df3d41950fb462ed38308eea019113ad1508da725bbedcd0fa5a85ef5f7"
 
 [[package]]
+name = "hatysa"
+version = "0.1.0"
+dependencies = [
+ "eyre",
+ "reqwest 0.9.24",
+ "serenity",
+ "tokio 0.2.22",
+ "url 2.1.1",
+]
+
+[[package]]
 name = "hermit-abi"
 version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1690,17 +1701,6 @@ checksum = "a3e12110bc539e657a646068aaf5eb5b63af9d0c1f7b29c97113fad80e15f035"
 dependencies = [
  "arc-swap",
  "libc",
-]
-
-[[package]]
-name = "sketchify"
-version = "0.1.0"
-dependencies = [
- "eyre",
- "reqwest 0.9.24",
- "serenity",
- "tokio 0.2.22",
- "url 2.1.1",
 ]
 
 [[package]]
