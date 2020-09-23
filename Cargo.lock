@@ -178,6 +178,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "command_attr"
+version = "0.3.0-rc.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c538daab2daaf13de61cea91648a62bb11d267ef629f707d5fe3dd080043ab4d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "cookie"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1644,15 +1655,18 @@ dependencies = [
  "bitflags",
  "bytes 0.5.6",
  "chrono",
+ "command_attr",
  "flate2",
  "futures 0.3.5",
  "log",
  "reqwest 0.10.8",
  "serde",
  "serde_json",
+ "static_assertions",
  "tokio 0.2.22",
  "typemap_rev",
  "url 2.1.1",
+ "uwl",
 ]
 
 [[package]]
@@ -1721,6 +1735,12 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "string"
@@ -2125,6 +2145,12 @@ checksum = "90dbc611eb48397705a6b0f6e917da23ae517e4d127123d2cf7674206627d32a"
 dependencies = [
  "rand 0.6.5",
 ]
+
+[[package]]
+name = "uwl"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4bf03e0ca70d626ecc4ba6b0763b934b6f2976e8c744088bb3c1d646fbb1ad0"
 
 [[package]]
 name = "vcpkg"
