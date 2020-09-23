@@ -26,6 +26,7 @@ tasks:
         if [ $head = "$(git rev-parse origin/master)" ]; then \
             echo "Deploying from branch master on commit $head to ***REMOVED***"
             rsync -rP --delete target/release/sketchify $deploy:***REMOVED***
+            ssh $deploy 'sudo systemctl restart ***REMOVED***'
         else
             echo "Not deploying on commit $head"
             complete-build
