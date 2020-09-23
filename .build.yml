@@ -1,4 +1,4 @@
-image: archlinux
+image: ubuntu/bionic
 packages:
     - rustup
     - rsync
@@ -11,9 +11,10 @@ secrets:
 tasks:
     - install: |
         rustup install stable
+        rustup target add x86_64-unknown-linux-musl
     - build: |
         cd sketchify
-        cargo build --release
+        cargo build --release --target x86_64-unknown-linux-musl
     - deploy: |
         cd sketchify
         echo "StrictHostKeyChecking=no" >> ~/.ssh/config
