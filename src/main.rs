@@ -54,7 +54,7 @@ impl EventHandler for Handler {
                     .push(" sketchifying link: ")
                     .push_mono_safe(err)
                     .build(),
-                Ok(res) => MessageBuilder::new().push(res).build(),
+                Ok(res) => MessageBuilder::new().push_safe(res).build(),
             };
 
             if let Err(why) = msg.channel_id.say(&context.http, &response).await {
