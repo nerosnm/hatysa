@@ -9,6 +9,7 @@ publish = false
 eyre = "^0.6"
 reqwest = "^0.9"
 tokio = { version = "0.2", features = ["macros"] }
+url = "^2.1"
 
 [dependencies.serenity]
 version = "0.9.0-rc.1"

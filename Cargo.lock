@@ -1686,6 +1686,7 @@ dependencies = [
  "reqwest 0.9.24",
  "serenity",
  "tokio 0.2.22",
+ "url 2.1.1",
 ]
 
 [[package]]

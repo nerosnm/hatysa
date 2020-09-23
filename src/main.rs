@@ -1,11 +1,12 @@
-use std::env;
-
 use serenity::{
     async_trait,
     model::{channel::Message, gateway::Ready},
     prelude::*,
     utils::MessageBuilder,
 };
+use url::Url;
+
+use std::env;
 
 struct Handler;
 
@@ -55,6 +56,24 @@ impl EventHandler for Handler {
                     .push_mono_safe(err)
                     .build(),
                 Ok(res) => MessageBuilder::new().push_safe(res).build(),
+            };
+
+            if let Err(why) = msg.channel_id.say(&context.http, &response).await {
+                println!("Error sending message: {:?}", why);
+            }
+        } else if msg.content.starts_with(",echo") {
+            let url_res = msg
+                .content
+                .strip_prefix(",echo")
+                .map(str::trim)
+                .ok_or("Error extracting URL from message".to_string())
+                .and_then(|url_str| {
+                    Url::parse(url_str).map_err(|e| format!("Unable to parse URL: {}", e))
+                });
+
+            let response = match url_res {
+                Ok(url) => MessageBuilder::new().push(url).build(),
+                Err(err) => MessageBuilder::new().push_bold("Error: ").push(err).build(),
             };
 
             if let Err(why) = msg.channel_id.say(&context.http, &response).await {
