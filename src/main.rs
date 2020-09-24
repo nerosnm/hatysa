@@ -56,8 +56,14 @@ async fn sketchify(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         Url::parse(&*sketchified_url_str)
     }?;
 
-    let response = MessageBuilder::new().push(sketchified_url).build();
+    let response = MessageBuilder::new()
+        .push("<")
+        .push(sketchified_url)
+        .push(">")
+        .build();
     msg.channel_id.say(&ctx.http, &response).await?;
+
+    msg.delete(&ctx.http).await?;
 
     Ok(())
 }
