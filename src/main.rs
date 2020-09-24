@@ -57,7 +57,8 @@ async fn sketchify(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     }?;
 
     let response = MessageBuilder::new()
-        .push("<")
+        .mention(&msg.author)
+        .push(": <")
         .push(sketchified_url)
         .push(">")
         .build();
