@@ -4,7 +4,7 @@ use serenity::{
         macros::{command, group},
         Args, CommandResult, StandardFramework,
     },
-    model::{channel::Message, gateway::Ready},
+    model::{channel::Message, gateway::Activity, gateway::Ready},
     prelude::*,
     utils::MessageBuilder,
 };
@@ -77,8 +77,11 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+
+        ctx.set_activity(Activity::playing(",sketchify <url>"))
+            .await;
     }
 }
 
