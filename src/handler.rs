@@ -29,7 +29,7 @@ use tracing::{error, info, warn};
 use crate::command::{execute, Command, CommandError, Response};
 
 pub struct Handler {
-    pub prefix: &'static str,
+    pub prefix: String,
 }
 
 #[async_trait]

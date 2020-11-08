@@ -20,9 +20,10 @@ async fn main() -> Result<()> {
         .expect("global default subscriber should have been set");
 
     let token = env::var("DISCORD_TOKEN").wrap_err("expected a token in the environment")?;
+    let prefix = env::var("HATYSA_PREFIX").unwrap_or(",".to_string());
 
     let mut client = Client::builder(&token)
-        .event_handler(Handler { prefix: "," })
+        .event_handler(Handler { prefix })
         .await?;
 
     if let Err(why) = client.start().await {
