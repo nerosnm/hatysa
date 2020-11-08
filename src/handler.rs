@@ -3,32 +3,40 @@
 //! The handler layer takes [`Context`][ctx] and [`Message`][msg] information as
 //! input, and outputs information by:
 //!
-//! - First attempting to write response information back to Discord.
-//!     - If that fails, writing information about the communication failure to
-//!     the console.
-//! - If the response information was a failure, writing response information to
-//! the console.
+//! - First attempting to write response information back to Discord, including
+//! user-facing errors.
+//!     - If that fails, logging information about the communication failure.
+//! - If non-user-facing errors occurred, logging them.
 //!
 //! What response information should actually be written is determined by
 //! parsing the input to determine its intent, and in the event of the input
-//! forming a command, passing that command to [`command::execute()`][execute].
+//! forming a command, running it with [`execute()`][execute].
 //!
 //! [ctx]: ../../serenity/client/struct.Context.html
 //! [msg]: ../../serenity/model/channel/struct.Message.html
-//! [handle]: ../command/fn.execute.html
+//! [execute]: ../command/enum.Command.html#method.execute
 
 use eyre::{Result, WrapErr};
 use serenity::{
     async_trait,
+    client::{Context, EventHandler},
     model::{channel::Message, gateway::Activity, gateway::Ready, id::ChannelId, id::MessageId},
-    prelude::*,
 };
 use thiserror::Error;
 use tracing::{error, info, warn};
 
-use crate::command::{execute, Command, CommandError, Response};
+use crate::command::{Command, CommandError, Response};
 
+/// Hatysa event handler.
+///
+/// This is the outermost entrypoint for command execution. Messages passed to
+/// [`message()`][message] are parsed to determine if they match a command, and
+/// if they do, the parsed command is handed to [`command::execute()`][execute].
+///
+/// [message]: #method.message
+/// [execute]: ../command/fn.execute.html
 pub struct Handler {
+    /// The string that must come before all commands' names.
     pub prefix: String,
 }
 
@@ -49,7 +57,7 @@ impl EventHandler for Handler {
                 Ok(command) => {
                     info!("command in message id={} is valid, executing", msg.id);
 
-                    match execute(command).await {
+                    match command.execute().await {
                         Ok(responses) => {
                             info!(
                                 "successfully executed command in message id={}, running responses",
@@ -83,6 +91,12 @@ impl EventHandler for Handler {
 }
 
 impl Handler {
+    /// Attempt to parse a message as a command, and gather all information
+    /// needed to execute the command if parsing succeeds.
+    ///
+    /// If the message does not contain a command, `None` is returned. If the
+    /// message does contain a command but it could not be parsed or prepared
+    /// properly, `Some(Err(..))` is returned.
     async fn interpret_command(&self, ctx: &Context, msg: &Message) -> Option<Result<Command>> {
         if let Some(tail) = msg.content.strip_prefix(&self.prefix) {
             if tail.starts_with("ping") {
@@ -116,6 +130,7 @@ impl Handler {
         }
     }
 
+    /// Find the ID of the message that occurred immediately before `msg`.
     async fn find_previous_id(&self, ctx: &Context, msg: &Message) -> Result<MessageId> {
         let prev = msg
             .channel_id
@@ -130,6 +145,7 @@ impl Handler {
         Ok(target.id)
     }
 
+    /// Carry out the given `response`.
     async fn respond(&self, ctx: &Context, response: Response) -> Result<()> {
         match response {
             Response::SendMessage {
@@ -182,6 +198,14 @@ impl Handler {
         Ok(())
     }
 
+    /// Report [`err.user_friendly_message()`][ufm] to the user, by sending a
+    /// message.
+    ///
+    /// If the message reporting the error cannot be sent, the failure is logged
+    /// at the [`error!()`][error] level.
+    ///
+    /// [ufm]: ../command/enum.CommandError.html#method.user_friendly_message
+    /// [error]: ../../tracing/macro.error.html
     async fn report_to_user(&self, ctx: &Context, channel_id: ChannelId, err: CommandError) {
         warn!(
             "reporting error to user in channel id={}: {:#}",
@@ -195,6 +219,8 @@ impl Handler {
     }
 }
 
+/// Errors that could occur while handling a message or running commands as a
+/// result.
 #[derive(Error, Debug)]
 pub enum HandlerError {
     #[error("unable to send message")]

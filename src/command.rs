@@ -56,6 +56,31 @@ pub enum Command {
     },
 }
 
+impl Command {
+    /// Execute a command, returning the responses that should be performed (if any)
+    /// on success.
+    pub async fn execute(self) -> Result<Vec<Response>, CommandError> {
+        match self {
+            Command::Ping {
+                channel_id,
+                author_id,
+            } => Ok(ping::ping(channel_id, author_id)),
+            Command::React {
+                channel_id,
+                command_id,
+                target_id,
+                reaction,
+            } => react::react(channel_id, command_id, target_id, reaction),
+            Command::Sketchify {
+                url_raw,
+                channel_id,
+                command_id,
+                author_id,
+            } => sketchify::sketchify(url_raw, channel_id, command_id, author_id),
+        }
+    }
+}
+
 /// Possible responses as a result of a command.
 pub enum Response {
     /// Respond with a message in a channel.
@@ -97,6 +122,8 @@ pub enum CommandError {
 }
 
 impl CommandError {
+    /// Return a user friendly version of the error, suitable for sending to the
+    /// user as a Discord message.
     pub fn user_friendly_message(&self) -> String {
         match self {
             CommandError::NonAlphanumeric { original } => MessageBuilder::new()
@@ -114,28 +141,5 @@ impl CommandError {
                 .push("Failed to complete request. Please try again.")
                 .build(),
         }
-    }
-}
-
-/// Execute a command, returning the responses that should be performed (if any)
-/// on success.
-pub async fn execute(command: Command) -> Result<Vec<Response>, CommandError> {
-    match command {
-        Command::Ping {
-            channel_id,
-            author_id,
-        } => Ok(ping::ping(channel_id, author_id)),
-        Command::React {
-            channel_id,
-            command_id,
-            target_id,
-            reaction,
-        } => react::react(channel_id, command_id, target_id, reaction),
-        Command::Sketchify {
-            url_raw,
-            channel_id,
-            command_id,
-            author_id,
-        } => sketchify::sketchify(url_raw, channel_id, command_id, author_id),
     }
 }
