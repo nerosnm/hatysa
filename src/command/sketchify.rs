@@ -7,32 +7,50 @@ use serenity::{
     model::id::{ChannelId, MessageId, UserId},
     utils::MessageBuilder,
 };
+use tracing::{error, instrument, warn};
 use url::Url;
 
 use super::{CommandError, Response};
 
+#[instrument]
 pub fn sketchify(
     url_raw: String,
     channel_id: ChannelId,
     command_id: MessageId,
     author_id: UserId,
 ) -> Result<Vec<Response>, CommandError> {
-    let url = Url::parse(&*url_raw).or_else(|_| Url::parse(&*format!("http://{}", url_raw)))?;
+    let url = Url::parse(&*url_raw)
+        .or_else(|_| Url::parse(&*format!("http://{}", url_raw)))
+        .map_err(|err| {
+            warn!("failed to parse URL");
+            err
+        })?;
 
     let api_params = [("long_url", url.to_string())];
     let client = reqwest::Client::new();
     let mut res = client
         .post("http://verylegit.link/sketchify")
         .form(&api_params)
-        .send()?;
+        .send()
+        .map_err(|err| {
+            error!("failed to send request");
+            err
+        })?;
 
-    let sketchified_url_str = res.text()?;
+    let sketchified_url_str = res.text().map_err(|err| {
+        error!("failed to extract text from API response");
+        err
+    })?;
 
     let sketchified_url = if !sketchified_url_str.starts_with("http") {
         Url::parse(&*format!("http://{}", sketchified_url_str))
     } else {
         Url::parse(&*sketchified_url_str)
-    }?;
+    }
+    .map_err(|err| {
+        error!("failed to parse returned URL");
+        err
+    })?;
 
     let message = MessageBuilder::new()
         .mention(&author_id)

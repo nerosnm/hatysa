@@ -4,9 +4,11 @@ use serenity::{
     model::id::{ChannelId, UserId},
     utils::MessageBuilder,
 };
+use tracing::instrument;
 
 use super::Response;
 
+#[instrument]
 pub fn ping(channel_id: ChannelId, author_id: UserId) -> Vec<Response> {
     let reply = MessageBuilder::new()
         .push("User ")

@@ -5,11 +5,13 @@ use serenity::model::{
     channel::ReactionType,
     id::{ChannelId, MessageId},
 };
+use tracing::{instrument, warn};
 
 use std::collections::HashMap;
 
 use super::{CommandError, Response};
 
+#[instrument]
 pub fn react(
     channel_id: ChannelId,
     command_id: MessageId,
@@ -48,10 +50,14 @@ pub fn react(
 
         Ok(responses)
     } else if non_alphanum {
+        warn!("string contains non-alphanumeric characters");
+
         Err(CommandError::NonAlphanumeric {
             original: raw_reaction,
         })
     } else {
+        warn!("string contains repeated characters");
+
         Err(CommandError::Repetition {
             original: raw_reaction,
         })
