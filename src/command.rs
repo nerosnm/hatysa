@@ -9,6 +9,7 @@
 mod ping;
 mod react;
 mod sketchify;
+mod zalgo;
 
 use serenity::{
     model::{
@@ -54,6 +55,15 @@ pub enum Command {
         /// The ID of the user who sent the sketchify request.
         author_id: UserId,
     },
+    /// Convert text to Zalgo text.
+    Zalgo {
+        /// The ID of the channel the request was sent in.
+        channel_id: ChannelId,
+        /// The input to convert.
+        input: String,
+        /// If provided, the maximum number of characters to output.
+        max_chars: Option<usize>,
+    },
 }
 
 impl Command {
@@ -77,6 +87,11 @@ impl Command {
                 command_id,
                 author_id,
             } => sketchify::sketchify(url_raw, channel_id, command_id, author_id),
+            Command::Zalgo {
+                channel_id,
+                input,
+                max_chars,
+            } => zalgo::zalgo(channel_id, input, max_chars),
         }
     }
 }

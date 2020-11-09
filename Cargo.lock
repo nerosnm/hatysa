@@ -614,6 +614,7 @@ name = "hatysa"
 version = "0.2.0"
 dependencies = [
  "eyre",
+ "rand 0.7.3",
  "reqwest 0.9.24",
  "serenity",
  "thiserror",
