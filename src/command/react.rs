@@ -18,6 +18,9 @@ pub fn react(
     target_id: MessageId,
     raw_reaction: String,
 ) -> Result<Vec<Response>, CommandError> {
+    // Ignore spaces by removing them before checking if the input is valid.
+    let raw_reaction = raw_reaction.replace(" ", "");
+
     // An input string is only valid if it is entirely composed of alphanumeric
     // characters, and if each one only appears once.
     let non_alphanum = raw_reaction.contains(|c: char| !c.is_alphanumeric());
