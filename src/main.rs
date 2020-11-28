@@ -1,5 +1,6 @@
 pub mod command;
 pub mod handler;
+pub mod parse;
 
 use chrono::{DateTime, Utc};
 use eyre::{Result, WrapErr};

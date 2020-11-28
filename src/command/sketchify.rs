@@ -7,25 +7,18 @@ use serenity::{
     model::id::{ChannelId, MessageId, UserId},
     utils::MessageBuilder,
 };
-use tracing::{error, instrument, warn};
+use tracing::{error, instrument};
 use url::Url;
 
 use super::{CommandError, Response};
 
 #[instrument]
 pub fn sketchify(
-    url_raw: String,
+    url: Url,
     channel_id: ChannelId,
     command_id: MessageId,
     author_id: UserId,
 ) -> Result<Vec<Response>, CommandError> {
-    let url = Url::parse(&*url_raw)
-        .or_else(|_| Url::parse(&*format!("http://{}", url_raw)))
-        .map_err(|err| {
-            warn!("failed to parse URL");
-            err
-        })?;
-
     let api_params = [("long_url", url.to_string())];
     let client = reqwest::Client::new();
     let mut res = client

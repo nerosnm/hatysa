@@ -24,13 +24,15 @@ use serenity::{
         channel::{Message, ReactionType},
         gateway::Activity,
         gateway::Ready,
-        id::MessageId,
+        id::{ChannelId, MessageId},
     },
 };
+use structopt::{clap::Error as ClapError, StructOpt};
 use thiserror::Error;
 use tracing::{error, info, warn};
 
 use crate::command::{Command, CommandError, Response};
+use crate::parse::Options;
 
 /// Hatysa event handler.
 ///
@@ -81,12 +83,17 @@ impl EventHandler for Handler {
                                 msg.id
                             );
 
-                            self.report_to_user(&ctx, msg, err).await;
+                            self.report_command_error(&ctx, msg, err).await;
                         }
                     }
                 }
                 Err(err) => {
-                    error!("command in message id={} is invalid: {:#}", msg.id, err);
+                    error!(
+                        "command in message id={} is invalid, reporting to user",
+                        msg.id
+                    );
+
+                    self.report_clap_error(&ctx, msg.channel_id, err).await;
                 }
             }
         } else {
@@ -102,7 +109,11 @@ impl Handler {
     /// If the message does not contain a command, `None` is returned. If the
     /// message does contain a command but it could not be parsed or prepared
     /// properly, `Some(Err(..))` is returned.
-    async fn interpret_command(&self, ctx: &Context, msg: &Message) -> Option<Result<Command>> {
+    async fn interpret_command(
+        &self,
+        ctx: &Context,
+        msg: &Message,
+    ) -> Option<Result<Command, ClapError>> {
         // Non-private messages must have a prefix on them, but it's optional
         // for private messages, so if we don't find a prefix, check if it was a
         // private message and allow it if it was.
@@ -115,56 +126,49 @@ impl Handler {
         });
 
         if let Some(tail) = tail {
-            if let Some(tail) = tail.strip_prefix("clap").map(|tail| tail.trim()) {
-                Some(Ok(Command::Clap {
+            match Options::from_iter_safe(tail.split_whitespace()) {
+                Ok(Options::Clap { input }) => Some(Ok(Command::Clap {
                     channel_id: msg.channel_id,
-                    input: tail.to_string(),
-                }))
-            } else if tail.starts_with("info") {
-                Some(Ok(Command::Info {
+                    input,
+                })),
+                Ok(Options::Info) => Some(Ok(Command::Info {
                     channel_id: msg.channel_id,
-                }))
-            } else if tail.starts_with("ping") {
-                Some(Ok(Command::Ping {
+                })),
+                Ok(Options::Ping) => Some(Ok(Command::Ping {
                     channel_id: msg.channel_id,
                     author_id: msg.author.id,
-                }))
-            } else if let Some(tail) = tail.strip_prefix("react").map(|tail| tail.trim()) {
-                Some(
-                    self.find_previous_id(ctx, msg)
-                        .await
-                        .map(|prev_id| Command::React {
-                            channel_id: msg.channel_id,
-                            command_id: msg.id,
-                            target_id: prev_id,
-                            reaction: tail.to_owned(),
-                        }),
-                )
-            } else if let Some(tail) = tail.strip_prefix("sketchify").map(|tail| tail.trim()) {
-                Some(Ok(Command::Sketchify {
-                    url_raw: tail.to_owned(),
+                })),
+                Ok(Options::React { reaction }) => Some(self.find_previous_id(ctx, msg).await.map(
+                    |prev_id| Command::React {
+                        channel_id: msg.channel_id,
+                        command_id: msg.id,
+                        target_id: prev_id,
+                        reaction,
+                    },
+                )),
+                Ok(Options::Sketchify { url }) => Some(Ok(Command::Sketchify {
+                    url,
                     channel_id: msg.channel_id,
                     command_id: msg.id,
                     author_id: msg.author.id,
-                }))
-            } else if let Some(tail) = tail.strip_prefix("spongebob").map(|tail| tail.trim()) {
-                Some(Ok(Command::Spongebob {
+                })),
+                Ok(Options::Spongebob { input }) => Some(Ok(Command::Spongebob {
                     channel_id: msg.channel_id,
-                    input: tail.to_string(),
-                }))
-            } else if let Some(tail) = tail.strip_prefix("vape").map(|tail| tail.trim()) {
-                Some(Ok(Command::Vape {
+                    input,
+                })),
+                Ok(Options::Vape { input }) => Some(Ok(Command::Vape {
                     channel_id: msg.channel_id,
-                    input: tail.to_string(),
-                }))
-            } else if let Some(tail) = tail.strip_prefix("zalgo").map(|tail| tail.trim()) {
-                Some(Ok(Command::Zalgo {
+                    input,
+                })),
+                Ok(Options::Zalgo { input }) => Some(Ok(Command::Zalgo {
                     channel_id: msg.channel_id,
-                    input: tail.to_string(),
+                    input: input.join(" "),
                     max_chars: None,
-                }))
-            } else {
-                None
+                })),
+                Err(err) => {
+                    self.report_clap_error(ctx, msg.channel_id, err);
+                    None
+                }
             }
         } else {
             None
@@ -269,15 +273,15 @@ impl Handler {
         Ok(())
     }
 
-    /// Report [`err.user_friendly_message()`][ufm] to the user, by sending a
-    /// message.
+    /// Report a [`CommandError`] to the user, by sending a message containing
+    /// its [`err.user_friendly_message()`][ufm] .
     ///
     /// If the message reporting the error cannot be sent, the failure is logged
     /// at the [`error!()`][error] level.
     ///
     /// [ufm]: ../command/enum.CommandError.html#method.user_friendly_message
     /// [error]: ../../tracing/macro.error.html
-    async fn report_to_user(&self, ctx: &Context, original: Message, err: CommandError) {
+    async fn report_command_error(&self, ctx: &Context, original: Message, err: CommandError) {
         warn!(
             "reporting error to user in channel id={}: {:#}",
             original.channel_id, err
@@ -349,6 +353,22 @@ impl Handler {
                     }
                 }
             }
+            Err(err) => error!("unable to report error: {:#}", err),
+        }
+    }
+
+    /// Report a [`clap::Error`][claperror] to the user, by sending a message.
+    ///
+    /// If the message reporting the error cannot be sent, the failure is logged
+    /// at the [`error!()`][error] level.
+    ///
+    /// [claperror]: ../../clap/struct.Error.html
+    /// [error]: ../../tracing/macro.error.html
+    async fn report_clap_error(&self, ctx: &Context, channel_id: ChannelId, err: ClapError) {
+        warn!("reporting clap error to user in channel id={}", channel_id);
+
+        match channel_id.say(&ctx.http, err.message).await {
+            Ok(_) => info!("successfully reported error"),
             Err(err) => error!("unable to report error: {:#}", err),
         }
     }

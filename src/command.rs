@@ -24,7 +24,7 @@ use serenity::{
     utils::MessageBuilder,
 };
 use thiserror::Error;
-use url::ParseError;
+use url::{ParseError, Url};
 
 /// Commands that can be performed.
 pub enum Command {
@@ -65,7 +65,7 @@ pub enum Command {
     /// [sketchify]: https://verylegit.link
     Sketchify {
         /// The string provided for the URL to sketchify.
-        url_raw: String,
+        url: Url,
         /// The ID of the channel the sketchify request was sent in.
         channel_id: ChannelId,
         /// The ID of the message that contained the sketchify command.
@@ -116,11 +116,11 @@ impl Command {
                 reaction,
             } => react::react(channel_id, command_id, target_id, reaction),
             Command::Sketchify {
-                url_raw,
+                url,
                 channel_id,
                 command_id,
                 author_id,
-            } => sketchify::sketchify(url_raw, channel_id, command_id, author_id),
+            } => sketchify::sketchify(url, channel_id, command_id, author_id),
             Command::Spongebob { channel_id, input } => spongebob::spongebob(channel_id, input),
             Command::Vape { channel_id, input } => vape::vape(channel_id, input),
             Command::Zalgo {
