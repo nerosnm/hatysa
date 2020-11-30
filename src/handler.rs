@@ -122,6 +122,11 @@ impl Handler {
                     command_id: msg.id,
                     author_id: msg.author.id,
                 }))
+            } else if let Some(tail) = tail.strip_prefix("spongebob").map(|tail| tail.trim()) {
+                Some(Ok(Command::Spongebob {
+                    channel_id: msg.channel_id,
+                    input: tail.to_string(),
+                }))
             } else if let Some(tail) = tail.strip_prefix("zalgo").map(|tail| tail.trim()) {
                 Some(Ok(Command::Zalgo {
                     channel_id: msg.channel_id,
