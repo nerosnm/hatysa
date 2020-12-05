@@ -20,7 +20,12 @@ use eyre::{Result, WrapErr};
 use serenity::{
     async_trait,
     client::{Context, EventHandler},
-    model::{channel::Message, gateway::Activity, gateway::Ready, id::ChannelId, id::MessageId},
+    model::{
+        channel::{Message, ReactionType},
+        gateway::Activity,
+        gateway::Ready,
+        id::MessageId,
+    },
 };
 use thiserror::Error;
 use tracing::{error, info, warn};
@@ -76,7 +81,7 @@ impl EventHandler for Handler {
                                 msg.id
                             );
 
-                            self.report_to_user(&ctx, msg.channel_id, err).await;
+                            self.report_to_user(&ctx, msg, err).await;
                         }
                     }
                 }
@@ -222,14 +227,78 @@ impl Handler {
     ///
     /// [ufm]: ../command/enum.CommandError.html#method.user_friendly_message
     /// [error]: ../../tracing/macro.error.html
-    async fn report_to_user(&self, ctx: &Context, channel_id: ChannelId, err: CommandError) {
+    async fn report_to_user(&self, ctx: &Context, original: Message, err: CommandError) {
         warn!(
             "reporting error to user in channel id={}: {:#}",
-            channel_id, err
+            original.channel_id, err
         );
 
-        match channel_id.say(&ctx.http, err.user_friendly_message()).await {
-            Ok(_) => info!("successfully reported error"),
+        let avatar_url = if let Ok(current_user) = ctx.http.get_current_user().await {
+            current_user.avatar_url()
+        } else {
+            warn!("unable to retrieve avatar url for bot");
+            None
+        };
+
+        match original
+            .channel_id
+            .send_message(&ctx.http, |m| {
+                m.embed(|e| {
+                    e.author(|a| {
+                        if let Some(url) = avatar_url {
+                            a.icon_url(url);
+                        }
+
+                        a.name("Hatysa").url("https://todo.sr.ht/~nerosnm/hatysa")
+                    })
+                    .field("Error", err.user_friendly_message(), true)
+                    .footer(|f| {
+                        // TODO: Implement ,help command
+                        // f.text(format!(
+                        //     "For help, run {prefix}help. Click OK to delete.",
+                        //     prefix = self.prefix
+                        // ))
+                        f.text("Click OK to delete.")
+                    })
+                    .colour((244, 234, 62))
+                })
+                .reactions(vec![ReactionType::Unicode("🆗".to_string())])
+            })
+            .await
+        {
+            Ok(sent_message) => {
+                info!("successfully reported error");
+
+                if let Some(_) = sent_message
+                    .await_reaction(&ctx)
+                    .filter(|react| react.emoji == ReactionType::Unicode("🆗".to_string()))
+                    .author_id(original.author.id)
+                    .await
+                {
+                    info!(
+                        "got an OK reaction on error message {}, deleting",
+                        sent_message.id
+                    );
+
+                    match sent_message.delete(&ctx.http).await {
+                        Ok(_) => {
+                            info!("successfully deleted error message {}", sent_message.id);
+                        }
+                        Err(_) => {
+                            error!("unable to delete error message {}", sent_message.id);
+                        }
+                    }
+
+                    match original.delete(&ctx.http).await {
+                        Ok(_) => {
+                            info!("successfully deleted original message {}", sent_message.id);
+                        }
+                        Err(_) => {
+                            error!("unable to delete original message {}", sent_message.id);
+                        }
+                    }
+                }
+            }
             Err(err) => error!("unable to report error: {:#}", err),
         }
     }
