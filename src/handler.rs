@@ -99,7 +99,12 @@ impl Handler {
     /// properly, `Some(Err(..))` is returned.
     async fn interpret_command(&self, ctx: &Context, msg: &Message) -> Option<Result<Command>> {
         if let Some(tail) = msg.content.strip_prefix(&self.prefix) {
-            if tail.starts_with("ping") {
+            if let Some(tail) = tail.strip_prefix("clap").map(|tail| tail.trim()) {
+                Some(Ok(Command::Clap {
+                    channel_id: msg.channel_id,
+                    input: tail.to_string(),
+                }))
+            } else if tail.starts_with("ping") {
                 Some(Ok(Command::Ping {
                     channel_id: msg.channel_id,
                     author_id: msg.author.id,

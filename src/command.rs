@@ -6,6 +6,7 @@
 //!
 //! [handler]: ../handler/index.html
 
+mod clap;
 mod ping;
 mod react;
 mod sketchify;
@@ -24,6 +25,13 @@ use url::ParseError;
 
 /// Commands that can be performed.
 pub enum Command {
+    /// Insert clapping emojis between every word of the input text.
+    Clap {
+        /// The ID of the channel the request was sent in.
+        channel_id: ChannelId,
+        /// The input to convert.
+        input: String,
+    },
     /// A request from a user for a response from the bot, for testing purposes.
     Ping {
         /// The ID of the channel the ping request was sent in.
@@ -79,6 +87,7 @@ impl Command {
     /// on success.
     pub async fn execute(self) -> Result<Vec<Response>, CommandError> {
         match self {
+            Command::Clap { channel_id, input } => clap::clap(channel_id, input),
             Command::Ping {
                 channel_id,
                 author_id,
