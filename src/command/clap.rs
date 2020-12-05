@@ -11,11 +11,16 @@ pub fn clap(channel_id: ChannelId, input: String) -> Result<Vec<Response>, Comma
 
     let clappified = words
         .next()
+        .map(|first| first.to_string())
         .map(|first| {
-            words.fold(first.to_string(), |mut acc, next| {
+            words.fold(first, |mut acc, next| {
                 acc.push_str(&format!(" 👏 {}", next));
                 acc
             })
+        })
+        .map(|mut output| {
+            output.push_str(" 👏");
+            output
         })
         .unwrap_or_else(|| String::new());
 
