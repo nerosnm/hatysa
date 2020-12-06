@@ -96,7 +96,7 @@ impl Command {
     pub async fn execute(self) -> Result<Vec<Response>, CommandError> {
         match self {
             Command::Clap { channel_id, input } => clap::clap(channel_id, input),
-            Command::Info { channel_id } => Ok(info::info(channel_id)),
+            Command::Info { channel_id } => Ok(info::info(channel_id).await),
             Command::Ping {
                 channel_id,
                 author_id,

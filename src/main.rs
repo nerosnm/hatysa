@@ -1,16 +1,23 @@
 pub mod command;
 pub mod handler;
 
+use chrono::{DateTime, Utc};
 use eyre::{Result, WrapErr};
 use serenity::prelude::*;
-use tracing::error;
+use tokio::sync::Mutex;
+use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use std::env;
+use std::sync::Arc;
 
 use handler::Handler;
 
 const VERSION: &str = "0.2.1";
+
+lazy_static::lazy_static! {
+    static ref START_TIME: Arc<Mutex<DateTime<Utc>>> = Arc::new(Mutex::new(Utc::now()));
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -23,6 +30,11 @@ async fn main() -> Result<()> {
 
     let token = env::var("DISCORD_TOKEN").wrap_err("expected a token in the environment")?;
     let prefix = env::var("HATYSA_PREFIX").unwrap_or(",".to_string());
+
+    {
+        let start_time = START_TIME.lock().await;
+        info!("starting hatysa at {}", start_time);
+    }
 
     let mut client = Client::builder(&token)
         .event_handler(Handler { prefix })

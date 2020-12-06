@@ -7,7 +7,9 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
+chrono = "^0.4"
 eyre = "^0.6"
+lazy_static = "^1.4"
 rand = "^0.7"
 reqwest = "^0.9"
 thiserror = "^1.0"
