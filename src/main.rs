@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use handler::Handler;
 
-const VERSION: &str = "0.3.0";
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 lazy_static::lazy_static! {
     static ref START_TIME: Arc<Mutex<DateTime<Utc>>> = Arc::new(Mutex::new(Utc::now()));
