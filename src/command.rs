@@ -12,6 +12,7 @@ mod ping;
 mod react;
 mod sketchify;
 mod spongebob;
+mod vape;
 mod zalgo;
 
 use serenity::{
@@ -79,6 +80,13 @@ pub enum Command {
         /// The input to convert.
         input: String,
     },
+    /// Convert text to vaporwave (fullwidth) text.
+    Vape {
+        /// The ID of the channel the request was sent in.
+        channel_id: ChannelId,
+        /// The input to convert.
+        input: String,
+    },
     /// Convert text to Zalgo text.
     Zalgo {
         /// The ID of the channel the request was sent in.
@@ -114,6 +122,7 @@ impl Command {
                 author_id,
             } => sketchify::sketchify(url_raw, channel_id, command_id, author_id),
             Command::Spongebob { channel_id, input } => spongebob::spongebob(channel_id, input),
+            Command::Vape { channel_id, input } => vape::vape(channel_id, input),
             Command::Zalgo {
                 channel_id,
                 input,
@@ -168,6 +177,8 @@ pub enum CommandError {
     InvalidUrl(#[from] ParseError),
     #[error("could not complete request: {0}")]
     Request(#[from] reqwest::Error),
+    #[error("internal error: {0}")]
+    Internal(String),
 }
 
 impl CommandError {
@@ -188,6 +199,9 @@ impl CommandError {
             CommandError::InvalidUrl(_) => MessageBuilder::new().push("Invalid URL!").build(),
             CommandError::Request(_) => MessageBuilder::new()
                 .push("Failed to complete request. Please try again.")
+                .build(),
+            CommandError::Internal(_) => MessageBuilder::new()
+                .push("An internal error occurred. Please try again later.")
                 .build(),
         }
     }

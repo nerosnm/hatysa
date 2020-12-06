@@ -152,6 +152,11 @@ impl Handler {
                     channel_id: msg.channel_id,
                     input: tail.to_string(),
                 }))
+            } else if let Some(tail) = tail.strip_prefix("vape").map(|tail| tail.trim()) {
+                Some(Ok(Command::Vape {
+                    channel_id: msg.channel_id,
+                    input: tail.to_string(),
+                }))
             } else if let Some(tail) = tail.strip_prefix("zalgo").map(|tail| tail.trim()) {
                 Some(Ok(Command::Zalgo {
                     channel_id: msg.channel_id,
