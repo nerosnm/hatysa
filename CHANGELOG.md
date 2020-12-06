@@ -2,6 +2,10 @@
 
 ## 0.3.0
 
+### Miscellaneous
+
+- Split crate into a library and a binary, so that hatysa can be used from other Rust crates.
+
 ## 0.2.1
 
 ### Features

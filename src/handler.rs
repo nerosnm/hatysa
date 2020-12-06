@@ -16,6 +16,7 @@
 //! [msg]: ../../serenity/model/channel/struct.Message.html
 //! [execute]: ../command/enum.Command.html#method.execute
 
+use chrono::{DateTime, Utc};
 use eyre::{Result, WrapErr};
 use serenity::{
     async_trait,
@@ -30,7 +31,7 @@ use serenity::{
 use thiserror::Error;
 use tracing::{error, info, warn};
 
-use crate::command::{Command, CommandError, Response};
+use hatysa::command::{Command, CommandError, Response};
 
 /// Hatysa event handler.
 ///
@@ -43,6 +44,8 @@ use crate::command::{Command, CommandError, Response};
 pub struct Handler {
     /// The string that must come before all commands' names.
     pub prefix: String,
+    /// The date and time when this handler started running.
+    pub start_time: DateTime<Utc>,
 }
 
 #[async_trait]
@@ -123,6 +126,7 @@ impl Handler {
             } else if tail.starts_with("info") {
                 Some(Ok(Command::Info {
                     channel_id: msg.channel_id,
+                    start_time: self.start_time,
                 }))
             } else if tail.starts_with("ping") {
                 Some(Ok(Command::Ping {

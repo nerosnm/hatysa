@@ -1,16 +1,15 @@
 //! Provide some info about the currently running instance of the bot.
 
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serenity::{builder::CreateEmbed, model::id::ChannelId};
 use tracing::{debug, instrument};
 
 use super::Response;
-use crate::{START_TIME, VERSION};
+use crate::VERSION;
 
 #[instrument]
-pub async fn info(channel_id: ChannelId) -> Vec<Response> {
+pub async fn info(channel_id: ChannelId, start_time: DateTime<Utc>) -> Vec<Response> {
     // Get the time this instance started running.
-    let start_time = *START_TIME.lock().await;
     let now = Utc::now();
     let mut uptime = now - start_time;
 

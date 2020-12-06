@@ -15,6 +15,7 @@ mod spongebob;
 mod vape;
 mod zalgo;
 
+use chrono::{DateTime, Utc};
 use serenity::{
     builder::CreateEmbed,
     model::{
@@ -40,6 +41,8 @@ pub enum Command {
     Info {
         /// The ID of the channel the request was sent in.
         channel_id: ChannelId,
+        /// The start time of this bot instance.
+        start_time: DateTime<Utc>,
     },
     /// A request from a user for a response from the bot, for testing purposes.
     Ping {
@@ -104,7 +107,10 @@ impl Command {
     pub async fn execute(self) -> Result<Vec<Response>, CommandError> {
         match self {
             Command::Clap { channel_id, input } => clap::clap(channel_id, input),
-            Command::Info { channel_id } => Ok(info::info(channel_id).await),
+            Command::Info {
+                channel_id,
+                start_time,
+            } => Ok(info::info(channel_id, start_time).await),
             Command::Ping {
                 channel_id,
                 author_id,
