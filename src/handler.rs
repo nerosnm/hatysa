@@ -102,8 +102,8 @@ impl Handler {
                 Some(Command::Spongebob {
                     input: tail.to_string(),
                 })
-            } else if let Some(tail) = tail.strip_prefix("vape").map(|tail| tail.trim()) {
-                Some(Command::Vape {
+            } else if let Some(tail) = tail.strip_prefix("wavy").map(|tail| tail.trim()) {
+                Some(Command::Wavy {
                     input: tail.to_string(),
                 })
             } else if let Some(tail) = tail.strip_prefix("zalgo").map(|tail| tail.trim()) {

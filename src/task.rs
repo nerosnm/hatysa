@@ -87,7 +87,7 @@ impl Context {
         match response {
             Response::Clap { output }
             | Response::Spongebob { output }
-            | Response::Vape { output }
+            | Response::Wavy { output }
             | Response::Zalgo { output } => {
                 debug!("sending output in a plain message");
 

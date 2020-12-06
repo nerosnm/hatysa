@@ -5,7 +5,7 @@ mod info;
 mod react;
 mod sketchify;
 mod spongebob;
-mod vape;
+mod wavy;
 mod zalgo;
 
 use chrono::{DateTime, Utc};
@@ -47,7 +47,7 @@ pub enum Command {
         input: String,
     },
     /// Convert text to vaporwave (fullwidth) text.
-    Vape {
+    Wavy {
         /// The input to convert.
         input: String,
     },
@@ -70,7 +70,7 @@ impl Command {
             Command::React { input } => react::react(input),
             Command::Sketchify { url_raw } => sketchify::sketchify(url_raw),
             Command::Spongebob { input } => Ok(spongebob::spongebob(input)),
-            Command::Vape { input } => vape::vape(input),
+            Command::Wavy { input } => wavy::wavy(input),
             Command::Zalgo { input, max_chars } => Ok(zalgo::zalgo(input, max_chars)),
         }
     }
@@ -110,8 +110,8 @@ pub enum Response {
         /// The converted input.
         output: String,
     },
-    /// Response to a [Command::Vape].
-    Vape {
+    /// Response to a [Command::Wavy].
+    Wavy {
         /// The converted input.
         output: String,
     },

@@ -5,11 +5,11 @@ use tracing::{debug, instrument};
 use super::{CommandError, Response};
 
 #[instrument]
-pub fn vape(input: String) -> Result<Response, CommandError> {
+pub fn wavy(input: String) -> Result<Response, CommandError> {
     debug!(?input);
 
-    let response = Response::Vape {
-        output: vapify(input)?,
+    let response = Response::Wavy {
+        output: wavify(input)?,
     };
 
     debug!(?response);
@@ -17,7 +17,7 @@ pub fn vape(input: String) -> Result<Response, CommandError> {
     Ok(response)
 }
 
-fn vapify(input: String) -> Result<String, CommandError> {
+fn wavify(input: String) -> Result<String, CommandError> {
     input
         .chars()
         .map(|c| {

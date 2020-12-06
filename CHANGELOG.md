@@ -4,6 +4,7 @@
 
 ### Miscellaneous
 
+- Renamed `,vape` command to `,wavy`.
 - Made command processing independent of any Discord context (#9).
 - Split crate into a library and a binary, so that hatysa can be used from other Rust crates.
 
