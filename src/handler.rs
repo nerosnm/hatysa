@@ -24,7 +24,6 @@ use serenity::{
     client::{Context, EventHandler},
     model::{channel::Message, gateway::Activity, gateway::Ready},
 };
-use tracing::{info, trace};
 
 use hatysa::command::Command;
 

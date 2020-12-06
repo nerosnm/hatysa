@@ -14,7 +14,6 @@ use serenity::{
     },
     utils::MessageBuilder,
 };
-use tracing::{debug, error, info, instrument, trace, warn};
 
 use hatysa::command::{Command, CommandError, Response};
 

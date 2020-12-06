@@ -1,10 +1,12 @@
+#[macro_use]
+extern crate tracing;
+
 pub mod handler;
 pub mod task;
 
 use chrono::Utc;
 use eyre::{Result, WrapErr};
 use serenity::prelude::*;
-use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use std::env;

@@ -1,6 +1,5 @@
 //! Convert text to vaporwave (fullwidth) text.
 
-use tracing::{debug, instrument};
 
 use super::{CommandError, Response};
 

@@ -1,6 +1,5 @@
 //! Convert text to Spongebob-case text.
 
-use tracing::{debug, instrument};
 
 use super::Response;
 

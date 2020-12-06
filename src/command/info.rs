@@ -1,7 +1,6 @@
 //! Provide some info about the currently running instance of the bot.
 
 use chrono::{DateTime, Duration, Utc};
-use tracing::{debug, instrument};
 
 use super::Response;
 use crate::VERSION;

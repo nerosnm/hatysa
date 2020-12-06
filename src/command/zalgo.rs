@@ -1,7 +1,6 @@
 //! Convert text to Zalgo text.
 
 use rand::Rng;
-use tracing::{debug, instrument};
 
 use super::Response;
 

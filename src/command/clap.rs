@@ -1,6 +1,5 @@
 //! Insert clapping emojis between every word of the input text.
 
-use tracing::{debug, instrument};
 
 use super::Response;
 

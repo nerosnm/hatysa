@@ -70,6 +70,9 @@
 //!
 //! Bug & issue tracker: [~nerosnm/hatysa](https://todo.sr.ht/~nerosnm/hatysa).
 
+#[macro_use]
+extern crate tracing;
+
 pub mod command;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");

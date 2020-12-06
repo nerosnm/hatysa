@@ -3,7 +3,6 @@
 //!
 //! [sketchify]: https://verylegit.link
 
-use tracing::{debug, error, instrument, warn};
 use url::Url;
 
 use super::{CommandError, Response};
