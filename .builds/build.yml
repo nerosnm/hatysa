@@ -30,9 +30,7 @@ tasks:
             set +x
             echo "Deploying from branch master on commit $head"
             echo "$DEPLOY_HOST_KEY" >> ~/.ssh/known_hosts
-            rsync -rP --delete target/release/hatysa "$DEPLOY_USER"@"$DEPLOY_DEST":"$DEPLOY_PATH"
-            echo "Restarting remote service"
-            ssh "$DEPLOY_USER"@"$DEPLOY_DEST" "sudo systemctl restart $DEPLOY_SERV"
+            ssh-agent bash -c "ssh-add ~/.ssh/24b9f044-9069-4a9b-aac2-f2645854360d; rsync -rP --delete target/release/hatysa $DEPLOY_USER@$DEPLOY_DEST:$DEPLOY_PATH; ssh $DEPLOY_USER@$DEPLOY_DEST 'sudo systemctl restart $DEPLOY_SERV'"
             set -x
         else
             echo "Not deploying on commit $head"
