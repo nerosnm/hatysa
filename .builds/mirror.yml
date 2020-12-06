@@ -2,12 +2,12 @@ image: archlinux
 packages:
     - git
 secrets:
-    - d6f8e1e6-21ea-4923-8a06-66f80ceba86a
+    - 777a22fa-0c70-4266-9880-e3f56dd1a947
     - 7f8d98ef-a16a-44fa-9323-dbc0425e25fb
 tasks:
     - setup : |
         ssh-keyscan -H git.sr.ht >> ~/.ssh/known_hosts
-        ssh-agent bash -c 'ssh-add ~/.ssh/d6f8e1e6-21ea-4923-8a06-66f80ceba86a; git clone git@git.sr.ht:~nerosnm/hatysa --mirror'
+        ssh-agent bash -c 'ssh-add ~/.ssh/777a22fa-0c70-4266-9880-e3f56dd1a947; git clone git@git.sr.ht:~nerosnm/hatysa --mirror'
     - mirror: |
         cd hatysa.git
         ssh-keyscan -H github.com >> ~/.ssh/known_hosts

@@ -7,7 +7,8 @@ packages:
 sources:
     - git@git.sr.ht:~nerosnm/hatysa
 secrets:
-    - d6f8e1e6-21ea-4923-8a06-66f80ceba86a
+    - 777a22fa-0c70-4266-9880-e3f56dd1a947
+    - 24b9f044-9069-4a9b-aac2-f2645854360d
     - 1de8fcaf-d6f7-4986-842c-e51a0da26597
     - 98362052-d43f-4076-a53e-aa1d0d0c9b9b
 tasks:
