@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use handler::Handler;
 
-const VERSION: &str = "0.2.1";
+const VERSION: &str = "0.3.0";
 
 lazy_static::lazy_static! {
     static ref START_TIME: Arc<Mutex<DateTime<Utc>>> = Arc::new(Mutex::new(Utc::now()));
