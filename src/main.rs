@@ -1,4 +1,5 @@
 pub mod handler;
+pub mod task;
 
 use chrono::Utc;
 use eyre::{Result, WrapErr};
