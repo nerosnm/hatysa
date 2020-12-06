@@ -15,6 +15,7 @@ mod spongebob;
 mod zalgo;
 
 use serenity::{
+    builder::CreateEmbed,
     model::{
         channel::ReactionType,
         id::{ChannelId, MessageId, UserId},
@@ -130,6 +131,13 @@ pub enum Response {
         channel_id: ChannelId,
         /// The message to send.
         message: String,
+    },
+    /// Respond with a message containing the given embed.
+    SendEmbed {
+        /// The ID of the channel the message should be sent in.
+        channel_id: ChannelId,
+        /// The embed to send in the message.
+        embed: CreateEmbed,
     },
     /// React to a message.
     React {

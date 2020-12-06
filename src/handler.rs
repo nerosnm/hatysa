@@ -183,6 +183,36 @@ impl Handler {
                     .await
                     .wrap_err(HandlerError::SendMessage)?;
             }
+            Response::SendEmbed {
+                channel_id,
+                mut embed,
+            } => {
+                let avatar_url = if let Ok(current_user) = ctx.http.get_current_user().await {
+                    current_user.avatar_url()
+                } else {
+                    warn!("unable to retrieve avatar url for bot");
+                    None
+                };
+
+                // Send a message with the embed in it.
+                channel_id
+                    .send_message(&ctx.http, |m| {
+                        // Set up branding on embed.
+                        embed
+                            .author(|a| {
+                                if let Some(url) = avatar_url {
+                                    a.icon_url(url);
+                                }
+
+                                a.name("Hatysa").url("https://sr.ht/~nerosnm/hatysa")
+                            })
+                            .colour((244, 234, 62));
+
+                        m.set_embed(embed)
+                    })
+                    .await
+                    .wrap_err(HandlerError::SendMessage)?;
+            }
             Response::React {
                 channel_id,
                 message_id,
