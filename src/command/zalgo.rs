@@ -1,30 +1,24 @@
 //! Convert text to Zalgo text.
 
 use rand::Rng;
-use serenity::model::id::ChannelId;
 use tracing::{debug, instrument};
 
-use super::{CommandError, Response};
+use super::Response;
 
 #[instrument]
-pub fn zalgo(
-    channel_id: ChannelId,
-    input: String,
-    max_chars: Option<usize>,
-) -> Result<Vec<Response>, CommandError> {
+pub fn zalgo(input: String, max_chars: Option<usize>) -> Response {
     let per_char = max_chars
         .map(|max_chars| (max_chars - input.len()) / input.len())
         .map(|per_char| per_char.min(10))
         .unwrap_or_else(|| 10);
 
-    let zalgified = zalgify(input, per_char);
+    let response = Response::Zalgo {
+        output: zalgify(input, per_char),
+    };
 
-    debug!("zalgified response: {}", zalgified);
+    debug!(?response);
 
-    Ok(vec![Response::SendMessage {
-        channel_id,
-        message: zalgified,
-    }])
+    response
 }
 
 fn zalgify(input: String, per_char: usize) -> String {

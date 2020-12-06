@@ -1,12 +1,11 @@
 //! Convert text to Spongebob-case text.
 
-use serenity::model::id::ChannelId;
 use tracing::{debug, instrument};
 
-use super::{CommandError, Response};
+use super::Response;
 
 #[instrument]
-pub fn spongebob(channel_id: ChannelId, input: String) -> Result<Vec<Response>, CommandError> {
+pub fn spongebob(input: String) -> Response {
     let (_, spongebobified) =
         input
             .chars()
@@ -27,10 +26,11 @@ pub fn spongebob(channel_id: ChannelId, input: String) -> Result<Vec<Response>, 
                 (next_upper, output)
             });
 
-    debug!("spongebobified response: {}", spongebobified);
+    let response = Response::Spongebob {
+        output: spongebobified,
+    };
 
-    Ok(vec![Response::SendMessage {
-        channel_id,
-        message: spongebobified,
-    }])
+    debug!(?response);
+
+    response
 }

@@ -1,17 +1,18 @@
 //! Provide some info about the currently running instance of the bot.
 
 use chrono::{DateTime, Duration, Utc};
-use serenity::{builder::CreateEmbed, model::id::ChannelId};
 use tracing::{debug, instrument};
 
 use super::Response;
 use crate::VERSION;
 
 #[instrument]
-pub async fn info(channel_id: ChannelId, start_time: DateTime<Utc>) -> Vec<Response> {
+pub async fn info(start_time: DateTime<Utc>) -> Response {
     // Get the time this instance started running.
     let now = Utc::now();
     let mut uptime = now - start_time;
+
+    debug!(?now, ?uptime);
 
     // Convert the uptime into days, hours, minutes and seconds.
     let days = uptime.num_days();
@@ -25,17 +26,13 @@ pub async fn info(channel_id: ChannelId, start_time: DateTime<Utc>) -> Vec<Respo
 
     let seconds = uptime.num_seconds();
 
-    let version = VERSION;
-    let uptime_str = format!("{}d {}h {}m {}s", days, hours, minutes, seconds);
-    let homepage = "https://sr.ht/~nerosnm/hatysa";
+    let response = Response::Info {
+        version: VERSION.to_string(),
+        uptime: (days, hours, minutes, seconds),
+        homepage: "https://sr.ht/~nerosnm/hatysa".to_string(),
+    };
 
-    debug!(?version, ?start_time, ?uptime_str, ?homepage);
+    debug!(?response);
 
-    let embed = CreateEmbed::default()
-        .field("Version", version, true)
-        .field("Uptime", uptime_str, true)
-        .field("Homepage", homepage, false)
-        .to_owned();
-
-    vec![Response::SendEmbed { channel_id, embed }]
+    response
 }

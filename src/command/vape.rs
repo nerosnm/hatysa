@@ -1,20 +1,20 @@
 //! Convert text to vaporwave (fullwidth) text.
 
-use serenity::model::id::ChannelId;
 use tracing::{debug, instrument};
 
 use super::{CommandError, Response};
 
 #[instrument]
-pub fn vape(channel_id: ChannelId, input: String) -> Result<Vec<Response>, CommandError> {
-    let vapified = vapify(input)?;
+pub fn vape(input: String) -> Result<Response, CommandError> {
+    debug!(?input);
 
-    debug!(?vapified);
+    let response = Response::Vape {
+        output: vapify(input)?,
+    };
 
-    Ok(vec![Response::SendMessage {
-        channel_id,
-        message: vapified,
-    }])
+    debug!(?response);
+
+    Ok(response)
 }
 
 fn vapify(input: String) -> Result<String, CommandError> {

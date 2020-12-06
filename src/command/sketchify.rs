@@ -3,22 +3,15 @@
 //!
 //! [sketchify]: https://verylegit.link
 
-use serenity::{
-    model::id::{ChannelId, MessageId, UserId},
-    utils::MessageBuilder,
-};
-use tracing::{error, instrument, warn};
+use tracing::{debug, error, instrument, warn};
 use url::Url;
 
 use super::{CommandError, Response};
 
 #[instrument]
-pub fn sketchify(
-    url_raw: String,
-    channel_id: ChannelId,
-    command_id: MessageId,
-    author_id: UserId,
-) -> Result<Vec<Response>, CommandError> {
+pub fn sketchify(url_raw: String) -> Result<Response, CommandError> {
+    debug!(?url_raw);
+
     let url = Url::parse(&*url_raw)
         .or_else(|_| Url::parse(&*format!("http://{}", url_raw)))
         .map_err(|err| {
@@ -27,6 +20,8 @@ pub fn sketchify(
         })?;
 
     let api_params = [("long_url", url.to_string())];
+    debug!(?api_params);
+
     let client = reqwest::Client::new();
     let mut res = client
         .post("http://verylegit.link/sketchify")
@@ -36,6 +31,7 @@ pub fn sketchify(
             error!("failed to send request");
             err
         })?;
+    debug!(?res);
 
     let sketchified_url_str = res.text().map_err(|err| {
         error!("failed to extract text from API response");
@@ -52,21 +48,11 @@ pub fn sketchify(
         err
     })?;
 
-    let message = MessageBuilder::new()
-        .mention(&author_id)
-        .push(": <")
-        .push(sketchified_url)
-        .push(">")
-        .build();
+    let response = Response::Sketchify {
+        url: sketchified_url,
+    };
 
-    Ok(vec![
-        Response::SendMessage {
-            channel_id,
-            message,
-        },
-        Response::DeleteMessage {
-            channel_id,
-            message_id: command_id,
-        },
-    ])
+    debug!(?response);
+
+    Ok(response)
 }

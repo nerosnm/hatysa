@@ -1,12 +1,11 @@
 //! Insert clapping emojis between every word of the input text.
 
-use serenity::model::id::ChannelId;
 use tracing::{debug, instrument};
 
-use super::{CommandError, Response};
+use super::Response;
 
 #[instrument]
-pub fn clap(channel_id: ChannelId, input: String) -> Result<Vec<Response>, CommandError> {
+pub fn clap(input: String) -> Response {
     let mut words = input.split(" ");
 
     let clappified = words
@@ -24,10 +23,9 @@ pub fn clap(channel_id: ChannelId, input: String) -> Result<Vec<Response>, Comma
         })
         .unwrap_or_else(|| String::new());
 
-    debug!("clappified response: {}", clappified);
+    let response = Response::Clap { output: clappified };
 
-    Ok(vec![Response::SendMessage {
-        channel_id,
-        message: clappified,
-    }])
+    debug!(?response);
+
+    response
 }

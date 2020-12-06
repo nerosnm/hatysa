@@ -1,14 +1,7 @@
 //! Execute commands and return their output.
-//!
-//! The command layer takes commands from the [handler layer][handler] and
-//! determines the appropriate action, if any, to take based on the result of
-//! those commands, which it returns back to the handler.
-//!
-//! [handler]: ../handler/index.html
 
 mod clap;
 mod info;
-mod ping;
 mod react;
 mod sketchify;
 mod spongebob;
@@ -16,51 +9,29 @@ mod vape;
 mod zalgo;
 
 use chrono::{DateTime, Utc};
-use serenity::{
-    builder::CreateEmbed,
-    model::{
-        channel::ReactionType,
-        id::{ChannelId, MessageId, UserId},
-    },
-    utils::MessageBuilder,
-};
-use thiserror::Error;
-use url::ParseError;
+use url::{ParseError, Url};
 
 /// Commands that can be performed.
+#[derive(Debug)]
 pub enum Command {
     /// Insert clapping emojis between every word of the input text.
     Clap {
-        /// The ID of the channel the request was sent in.
-        channel_id: ChannelId,
         /// The input to convert.
         input: String,
     },
     /// A request from a user for some information about the currently running
     /// instance of the bot.
     Info {
-        /// The ID of the channel the request was sent in.
-        channel_id: ChannelId,
         /// The start time of this bot instance.
         start_time: DateTime<Utc>,
     },
-    /// A request from a user for a response from the bot, for testing purposes.
-    Ping {
-        /// The ID of the channel the ping request was sent in.
-        channel_id: ChannelId,
-        /// The id of the user who sent the ping request.
-        author_id: UserId,
-    },
-    /// Add a string as a series of reactions to a target message.
+    /// A request from a user for a response, to check if the bot is alive.
+    Ping,
+    /// Convert an input string into a series of emojis that can then be used to
+    /// react to a message.
     React {
-        /// The ID of the channel the command was sent in.
-        channel_id: ChannelId,
-        /// The ID of the message that contained the reaction command.
-        command_id: MessageId,
-        /// The ID of the message that should be reacted to.
-        target_id: MessageId,
-        /// The string to react to the target with.
-        reaction: String,
+        /// The string to convert to emojis.
+        input: String,
     },
     /// Convert a URL to a "sketchified" equivalent using [the Sketchify
     /// API][sketchify].
@@ -69,31 +40,19 @@ pub enum Command {
     Sketchify {
         /// The string provided for the URL to sketchify.
         url_raw: String,
-        /// The ID of the channel the sketchify request was sent in.
-        channel_id: ChannelId,
-        /// The ID of the message that contained the sketchify command.
-        command_id: MessageId,
-        /// The ID of the user who sent the sketchify request.
-        author_id: UserId,
     },
     /// Convert text to Spongebob-case text.
     Spongebob {
-        /// The ID of the channel the request was sent in.
-        channel_id: ChannelId,
         /// The input to convert.
         input: String,
     },
     /// Convert text to vaporwave (fullwidth) text.
     Vape {
-        /// The ID of the channel the request was sent in.
-        channel_id: ChannelId,
         /// The input to convert.
         input: String,
     },
     /// Convert text to Zalgo text.
     Zalgo {
-        /// The ID of the channel the request was sent in.
-        channel_id: ChannelId,
         /// The input to convert.
         input: String,
         /// If provided, the maximum number of characters to output.
@@ -102,78 +61,69 @@ pub enum Command {
 }
 
 impl Command {
-    /// Execute a command, returning the responses that should be performed (if any)
-    /// on success.
-    pub async fn execute(self) -> Result<Vec<Response>, CommandError> {
+    /// Execute a command, returning its response.
+    pub async fn execute(self) -> Result<Response, CommandError> {
         match self {
-            Command::Clap { channel_id, input } => clap::clap(channel_id, input),
-            Command::Info {
-                channel_id,
-                start_time,
-            } => Ok(info::info(channel_id, start_time).await),
-            Command::Ping {
-                channel_id,
-                author_id,
-            } => Ok(ping::ping(channel_id, author_id)),
-            Command::React {
-                channel_id,
-                command_id,
-                target_id,
-                reaction,
-            } => react::react(channel_id, command_id, target_id, reaction),
-            Command::Sketchify {
-                url_raw,
-                channel_id,
-                command_id,
-                author_id,
-            } => sketchify::sketchify(url_raw, channel_id, command_id, author_id),
-            Command::Spongebob { channel_id, input } => spongebob::spongebob(channel_id, input),
-            Command::Vape { channel_id, input } => vape::vape(channel_id, input),
-            Command::Zalgo {
-                channel_id,
-                input,
-                max_chars,
-            } => zalgo::zalgo(channel_id, input, max_chars),
+            Command::Clap { input } => Ok(clap::clap(input)),
+            Command::Info { start_time } => Ok(info::info(start_time).await),
+            Command::Ping => Ok(Response::Pong),
+            Command::React { input } => react::react(input),
+            Command::Sketchify { url_raw } => sketchify::sketchify(url_raw),
+            Command::Spongebob { input } => Ok(spongebob::spongebob(input)),
+            Command::Vape { input } => vape::vape(input),
+            Command::Zalgo { input, max_chars } => Ok(zalgo::zalgo(input, max_chars)),
         }
     }
 }
 
 /// Possible responses as a result of a command.
+#[derive(Debug)]
 pub enum Response {
-    /// Respond with a message in a channel.
-    SendMessage {
-        /// The ID of the channel the message should be sent in.
-        channel_id: ChannelId,
-        /// The message to send.
-        message: String,
+    /// Response to a [Command::Clap].
+    Clap {
+        /// The converted input.
+        output: String,
     },
-    /// Respond with a message containing the given embed.
-    SendEmbed {
-        /// The ID of the channel the message should be sent in.
-        channel_id: ChannelId,
-        /// The embed to send in the message.
-        embed: CreateEmbed,
+    /// Response to a [Command::Info].
+    Info {
+        /// The current version of the bot.
+        version: String,
+        /// Uptime, in the form `(days, hours, minutes, seconds)`.
+        uptime: (i64, i64, i64, i64),
+        /// The homepage of the bot.
+        homepage: String,
     },
-    /// React to a message.
+    /// Response to a [Command::Ping].
+    Pong,
+    /// Response to a [Command::React].
     React {
-        /// The ID of the channel the message to react to is in.
-        channel_id: ChannelId,
-        /// The ID of the message that the reaction should be added to.
-        message_id: MessageId,
-        /// The reaction to add to the message.
-        reaction: ReactionType,
+        /// A sequence of emojis created to represent the input string.
+        reactions: Vec<String>,
     },
-    /// Delete a message.
-    DeleteMessage {
-        /// The ID of the channel the message to delete is in.
-        channel_id: ChannelId,
-        /// The ID of the message that should be deleted.
-        message_id: MessageId,
+    /// Response to a [Command::Sketchify].
+    Sketchify {
+        /// The converted URL.
+        url: Url,
+    },
+    /// Response to a [Command::Spongebob].
+    Spongebob {
+        /// The converted input.
+        output: String,
+    },
+    /// Response to a [Command::Vape].
+    Vape {
+        /// The converted input.
+        output: String,
+    },
+    /// Response to a [Command::Zalgo].
+    Zalgo {
+        /// The converted input.
+        output: String,
     },
 }
 
 /// Errors that could occur during command processing.
-#[derive(Error, Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum CommandError {
     #[error("string \"{}\" contains non-alphanumeric characters", original)]
     NonAlphanumeric { original: String },
@@ -185,30 +135,4 @@ pub enum CommandError {
     Request(#[from] reqwest::Error),
     #[error("internal error: {0}")]
     Internal(String),
-}
-
-impl CommandError {
-    /// Return a user friendly version of the error, suitable for sending to the
-    /// user as a Discord message.
-    pub fn user_friendly_message(&self) -> String {
-        match self {
-            CommandError::NonAlphanumeric { original } => MessageBuilder::new()
-                .push("String ")
-                .push_bold(original.to_uppercase())
-                .push(" contains non-alphanumeric characters!")
-                .build(),
-            CommandError::Repetition { original } => MessageBuilder::new()
-                .push("String ")
-                .push_bold(original.to_uppercase())
-                .push(" contains repeated characters!")
-                .build(),
-            CommandError::InvalidUrl(_) => MessageBuilder::new().push("Invalid URL!").build(),
-            CommandError::Request(_) => MessageBuilder::new()
-                .push("Failed to complete request. Please try again.")
-                .build(),
-            CommandError::Internal(_) => MessageBuilder::new()
-                .push("An internal error occurred. Please try again later.")
-                .build(),
-        }
-    }
 }
