@@ -37,3 +37,7 @@ tasks:
             echo "Not deploying on commit $head"
             complete-build
         fi
+triggers:
+  - action: email
+    condition: failure
+    to: soren@neros.dev
