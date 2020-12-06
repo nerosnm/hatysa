@@ -1,6 +1,6 @@
 //! Provide some info about the currently running instance of the bot.
 
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use serenity::{builder::CreateEmbed, model::id::ChannelId};
 use tracing::{debug, instrument};
 
@@ -9,24 +9,31 @@ use crate::{START_TIME, VERSION};
 
 #[instrument]
 pub async fn info(channel_id: ChannelId) -> Vec<Response> {
+    // Get the time this instance started running.
     let start_time = *START_TIME.lock().await;
     let now = Utc::now();
-    let uptime = now - start_time;
+    let mut uptime = now - start_time;
 
-    let uptime_str = format!(
-        "{}d {}h {}m {}s",
-        uptime.num_days(),
-        uptime.num_hours(),
-        uptime.num_minutes(),
-        uptime.num_seconds()
-    );
+    // Convert the uptime into days, hours, minutes and seconds.
+    let days = uptime.num_days();
+    uptime = uptime - Duration::days(days);
 
+    let hours = uptime.num_hours();
+    uptime = uptime - Duration::hours(hours);
+
+    let minutes = uptime.num_minutes();
+    uptime = uptime - Duration::minutes(minutes);
+
+    let seconds = uptime.num_seconds();
+
+    let version = VERSION;
+    let uptime_str = format!("{}d {}h {}m {}s", days, hours, minutes, seconds);
     let homepage = "https://sr.ht/~nerosnm/hatysa";
 
-    debug!(version = VERSION, ?start_time, ?uptime_str, ?homepage);
+    debug!(?version, ?start_time, ?uptime_str, ?homepage);
 
     let embed = CreateEmbed::default()
-        .field("Version", VERSION, true)
+        .field("Version", version, true)
         .field("Uptime", uptime_str, true)
         .field("Homepage", homepage, false)
         .to_owned();
