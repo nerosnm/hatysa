@@ -10,6 +10,8 @@ use std::env;
 
 use handler::Handler;
 
+const VERSION: &str = "0.2.1";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let subscriber = FmtSubscriber::builder()

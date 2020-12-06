@@ -7,6 +7,7 @@
 //! [handler]: ../handler/index.html
 
 mod clap;
+mod info;
 mod ping;
 mod react;
 mod sketchify;
@@ -31,6 +32,12 @@ pub enum Command {
         channel_id: ChannelId,
         /// The input to convert.
         input: String,
+    },
+    /// A request from a user for some information about the currently running
+    /// instance of the bot.
+    Info {
+        /// The ID of the channel the request was sent in.
+        channel_id: ChannelId,
     },
     /// A request from a user for a response from the bot, for testing purposes.
     Ping {
@@ -88,6 +95,7 @@ impl Command {
     pub async fn execute(self) -> Result<Vec<Response>, CommandError> {
         match self {
             Command::Clap { channel_id, input } => clap::clap(channel_id, input),
+            Command::Info { channel_id } => Ok(info::info(channel_id)),
             Command::Ping {
                 channel_id,
                 author_id,

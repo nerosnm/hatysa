@@ -109,6 +109,10 @@ impl Handler {
                     channel_id: msg.channel_id,
                     input: tail.to_string(),
                 }))
+            } else if tail.starts_with("info") {
+                Some(Ok(Command::Info {
+                    channel_id: msg.channel_id,
+                }))
             } else if tail.starts_with("ping") {
                 Some(Ok(Command::Ping {
                     channel_id: msg.channel_id,
