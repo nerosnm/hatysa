@@ -103,7 +103,18 @@ impl Handler {
     /// message does contain a command but it could not be parsed or prepared
     /// properly, `Some(Err(..))` is returned.
     async fn interpret_command(&self, ctx: &Context, msg: &Message) -> Option<Result<Command>> {
-        if let Some(tail) = msg.content.strip_prefix(&self.prefix) {
+        // Non-private messages must have a prefix on them, but it's optional
+        // for private messages, so if we don't find a prefix, check if it was a
+        // private message and allow it if it was.
+        let tail = msg.content.strip_prefix(&self.prefix).or_else(|| {
+            if msg.is_private() {
+                Some(&*msg.content)
+            } else {
+                None
+            }
+        });
+
+        if let Some(tail) = tail {
             if let Some(tail) = tail.strip_prefix("clap").map(|tail| tail.trim()) {
                 Some(Ok(Command::Clap {
                     channel_id: msg.channel_id,
