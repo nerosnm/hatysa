@@ -68,7 +68,7 @@ impl Command {
             Command::Info { start_time } => Ok(info::info(start_time).await),
             Command::Ping => Ok(Response::Pong),
             Command::React { input } => react::react(input),
-            Command::Sketchify { url_raw } => sketchify::sketchify(url_raw),
+            Command::Sketchify { url_raw } => sketchify::sketchify(url_raw).await,
             Command::Spongebob { input } => Ok(spongebob::spongebob(input)),
             Command::Wavy { input } => wavy::wavy(input),
             Command::Zalgo { input, max_chars } => Ok(zalgo::zalgo(input, max_chars)),

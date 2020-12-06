@@ -9,7 +9,7 @@ use url::Url;
 use super::{CommandError, Response};
 
 #[instrument]
-pub fn sketchify(url_raw: String) -> Result<Response, CommandError> {
+pub async fn sketchify(url_raw: String) -> Result<Response, CommandError> {
     debug!(?url_raw);
 
     let url = Url::parse(&*url_raw)
@@ -23,17 +23,18 @@ pub fn sketchify(url_raw: String) -> Result<Response, CommandError> {
     debug!(?api_params);
 
     let client = reqwest::Client::new();
-    let mut res = client
+    let res = client
         .post("http://verylegit.link/sketchify")
         .form(&api_params)
         .send()
+        .await
         .map_err(|err| {
             error!("failed to send request");
             err
         })?;
     debug!(?res);
 
-    let sketchified_url_str = res.text().map_err(|err| {
+    let sketchified_url_str = res.text().await.map_err(|err| {
         error!("failed to extract text from API response");
         err
     })?;
