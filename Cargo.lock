@@ -408,7 +408,6 @@ version = "0.3.0"
 dependencies = [
  "chrono",
  "eyre",
- "lazy_static",
  "rand",
  "reqwest",
  "serenity",
