@@ -27,6 +27,6 @@ default-features = false
 features = ["client", "gateway", "rustls_backend", "model", "collector"]
 
 [dependencies.tokio]
-version = "^0.3"
+version = "^0.2"
 features = ["full"]
 
