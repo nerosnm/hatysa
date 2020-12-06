@@ -8,7 +8,7 @@
 [Discord]: https://img.shields.io/discord/784921066157768716?label=support
 [discord.gg]: https://discord.gg/sv6JpHtXCD
 
-Hatysa is a Discord bot that implements a few fun commands.
+Hatysa (/hɑːˈtiːsə/) is a Discord bot that implements a few fun commands.
 
 ## Usage
 
