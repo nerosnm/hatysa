@@ -6,10 +6,10 @@ packages:
     - pkg-config
 sources:
     - git@git.sr.ht:~nerosnm/hatysa
-environment:
-  deploy: ***REMOVED***
 secrets:
     - d6f8e1e6-21ea-4923-8a06-66f80ceba86a
+    - 1de8fcaf-d6f7-4986-842c-e51a0da26597
+    - 98362052-d43f-4076-a53e-aa1d0d0c9b9b
 tasks:
     - install: |
         curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -21,12 +21,18 @@ tasks:
         cargo build --release
     - deploy: |
         cd hatysa
-        echo "StrictHostKeyChecking=no" >> ~/.ssh/config
+        set +x
+        source ~/.hatysa_secret
+        set -x
         head=$(git rev-parse HEAD)
-        if [ $head = "$(git rev-parse origin/master)" ]; then \
-            echo "Deploying from branch master on commit $head to ***REMOVED***"
-            rsync -rP --delete target/release/hatysa $deploy:***REMOVED***
-            ssh $deploy 'sudo systemctl restart ***REMOVED***'
+        if [ "$head" = "$(git rev-parse origin/master)" ]; then \
+            set +x
+            echo "Deploying from branch master on commit $head"
+            echo "$DEPLOY_HOST_KEY" >> ~/.ssh/known_hosts
+            rsync -rP --delete target/release/hatysa "$DEPLOY_USER"@"$DEPLOY_DEST":"$DEPLOY_PATH"
+            echo "Restarting remote service"
+            ssh "$DEPLOY_USER"@"$DEPLOY_DEST" "sudo systemctl restart $DEPLOY_SERV"
+            set -x
         else
             echo "Not deploying on commit $head"
             complete-build
