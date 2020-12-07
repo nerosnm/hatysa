@@ -2,6 +2,10 @@
 
 ## 0.3.0
 
+### Features
+
+- Comprehensive instrumentation using `tracing` (#2).
+
 ### Miscellaneous
 
 - Renamed `,vape` command to `,wavy`.

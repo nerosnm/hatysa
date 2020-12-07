@@ -24,6 +24,7 @@ use serenity::{
     client::{Context, EventHandler},
     model::{channel::Message, gateway::Activity, gateway::Ready},
 };
+use tracing::{Instrument, Level};
 
 use hatysa::command::Command;
 
@@ -54,12 +55,22 @@ impl EventHandler for Handler {
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
-        if let Some(command) = self.interpret_command(&msg).await {
-            trace!("message id={} is a command, executing", msg.id);
-            Task::new(command, ctx, msg).execute().await;
-        } else {
-            trace!("message id={} is not a command", msg.id);
+        let span = trace_span!("handler");
+        async move {
+            if let Some(command) = self.interpret_command(&msg).await {
+                event!(
+                    Level::DEBUG,
+                    id = msg.id.0,
+                    "message is a command, executing",
+                );
+
+                Task::new(command, ctx, msg).execute().await;
+            } else {
+                event!(Level::DEBUG, id = msg.id.0, "message is not a command");
+            }
         }
+        .instrument(span)
+        .await;
     }
 }
 
