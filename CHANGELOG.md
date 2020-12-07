@@ -6,7 +6,7 @@
 
 - Comprehensive instrumentation using `tracing` (#2).
 
-### Miscellaneous
+### Miscellaneous
 
 - Renamed `,vape` command to `,wavy`.
 - Made command processing independent of any Discord context (#9).
@@ -14,7 +14,7 @@
 
 ## 0.2.1
 
-### Features
+### Features
 
 - `,vape` command to convert all the characters in the input into their Unicode fullwidth 
 equivalents (#6).
@@ -36,7 +36,7 @@ equivalents (#6).
 
 ## 0.1.0
 
-### Features
+### Features
 
 - `,react` command to convert a string to a series of emojis and react to the last message in the 
 channel with those emojis.
