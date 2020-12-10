@@ -22,6 +22,8 @@ async fn main() -> Result<()> {
     tracing::subscriber::set_global_default(subscriber)
         .expect("global default subscriber should have been set");
 
+    dotenv::dotenv().ok();
+
     let token = env::var("DISCORD_TOKEN").wrap_err("expected a token in the environment")?;
     let prefix = env::var("HATYSA_PREFIX").unwrap_or(",".to_string());
 

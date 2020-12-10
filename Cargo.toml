@@ -11,6 +11,7 @@ discord = ["serenity"]
 
 [dependencies]
 chrono = "^0.4"
+dotenv = "^0.15"
 eyre = "^0.6"
 rand = "^0.7"
 reqwest = "^0.10"
