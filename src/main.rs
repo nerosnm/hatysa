@@ -15,9 +15,8 @@ use handler::Handler;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let subscriber = FmtSubscriber::builder()
-        .with_env_filter(EnvFilter::from_default_env())
-        .finish();
+    let filter = EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("info,hatysa=debug"));
+    let subscriber = FmtSubscriber::builder().with_env_filter(filter).finish();
 
     tracing::subscriber::set_global_default(subscriber)
         .expect("global default subscriber should have been set");
