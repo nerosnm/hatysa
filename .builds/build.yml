@@ -6,6 +6,8 @@ packages:
     - pkg-config
 sources:
     - git@git.sr.ht:~nerosnm/hatysa
+environment:
+    RUSTFLAGS: "-D warnings"
 secrets:
     - 777a22fa-0c70-4266-9880-e3f56dd1a947
     - 24b9f044-9069-4a9b-aac2-f2645854360d
@@ -16,25 +18,41 @@ tasks:
         curl https://sh.rustup.rs -sSf | sh -s -- -y
         source ~/.cargo/env
         rustup install stable
+        rustup component add rustfmt clippy
+    - lint: |
+        cd hatysa
+        source ~/.cargo/env
+        cargo fmt --all -- --check
+        cargo clippy --all
     - build: |
         cd hatysa
         source ~/.cargo/env
-        cargo build --release
+        cargo build --all
+    - test: |
+        cd hatysa
+        source ~/.cargo/env
+        cargo test --all
+    - release: |
+        cd hatysa
+        source ~/.cargo/env
+        head=$(git rev-parse HEAD)
+        if [ "$head" = "$(git rev-parse origin/master)" ]; then
+            cargo build --release
+        else
+            echo "Not building for release on commit $head"
+        fi
     - deploy: |
         cd hatysa
-        set +x
-        source ~/.hatysa_secret
-        set -x
         head=$(git rev-parse HEAD)
-        if [ "$head" = "$(git rev-parse origin/master)" ]; then \
+        if [ "$head" = "$(git rev-parse origin/master)" ]; then
             set +x
+            source ~/.hatysa_secret
             echo "Deploying from branch master on commit $head"
             echo "$DEPLOY_HOST_KEY" >> ~/.ssh/known_hosts
             ssh-agent bash -c "ssh-add ~/.ssh/24b9f044-9069-4a9b-aac2-f2645854360d; rsync -rP --delete target/release/hatysa $DEPLOY_USER@$DEPLOY_DEST:$DEPLOY_PATH; ssh $DEPLOY_USER@$DEPLOY_DEST 'sudo systemctl restart $DEPLOY_SERV'"
             set -x
         else
             echo "Not deploying on commit $head"
-            complete-build
         fi
 triggers:
   - action: email
