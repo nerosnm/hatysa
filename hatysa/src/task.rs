@@ -97,6 +97,69 @@ impl Context {
 
                 self.message.channel_id.say(&self.ctx.http, output).await?;
             }
+            Response::Karma { subject, karma } => {
+                debug!("attempting to retrieve URL of bot user's avatar");
+
+                let avatar_url = if let Ok(current_user) = self.ctx.http.get_current_user().await {
+                    debug!("found avatar URL");
+                    current_user.avatar_url()
+                } else {
+                    warn!("unable to retrieve avatar url for bot");
+                    None
+                };
+
+                self.message
+                    .channel_id
+                    .send_message(&self.ctx.http, |m| {
+                        debug!("constructing embed");
+
+                        let mut embed = CreateEmbed::default();
+
+                        embed
+                            .author(|a| {
+                                avatar_url.map(|url| a.icon_url(url));
+                                a.name("Hatysa").url("https://sr.ht/~nerosnm/hatysa")
+                            })
+                            .field("Subject", subject, true)
+                            .field("Karma", format!("{}", karma), true)
+                            .colour((244, 234, 62));
+
+                        m.set_embed(embed)
+                    })
+                    .await?;
+            }
+            Response::KarmaTop { .. } => {
+                debug!("attempting to retrieve URL of bot user's avatar");
+
+                let avatar_url = if let Ok(current_user) = self.ctx.http.get_current_user().await {
+                    debug!("found avatar URL");
+                    current_user.avatar_url()
+                } else {
+                    warn!("unable to retrieve avatar url for bot");
+                    None
+                };
+
+                self.message
+                    .channel_id
+                    .send_message(&self.ctx.http, |m| {
+                        debug!("constructing embed");
+
+                        let mut embed = CreateEmbed::default();
+
+                        embed
+                            .author(|a| {
+                                avatar_url.map(|url| a.icon_url(url));
+                                a.name("Hatysa").url("https://sr.ht/~nerosnm/hatysa")
+                            })
+                            .colour((244, 234, 62));
+
+                        m.set_embed(embed)
+                    })
+                    .await?;
+            }
+            Response::KarmaDecrement | Response::KarmaIncrement => {
+                debug!("successful karma decrement and increment have no response");
+            }
             Response::Info {
                 version,
                 uptime: (days, hours, minutes, seconds),

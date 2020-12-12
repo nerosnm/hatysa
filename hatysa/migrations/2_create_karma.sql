@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS karma (
+    id INTEGER PRIMARY KEY NOT NULL,
+    topic TEXT NOT NULL,
+    karma INTEGER NOT NULL,
+    guild_id TEXT NOT NULL,
+    FOREIGN KEY(guild_id) REFERENCES guild(id)
+);

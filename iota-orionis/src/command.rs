@@ -8,8 +8,14 @@ mod spongebob;
 mod wavy;
 mod zalgo;
 
+#[cfg(feature = "persistence")]
+mod karma;
+
 use chrono::{DateTime, Utc};
 use url::{ParseError, Url};
+
+#[cfg(feature = "persistence")]
+use sqlx::sqlite::SqlitePool;
 
 /// Commands that can be performed.
 #[derive(Debug)]
@@ -24,6 +30,36 @@ pub enum Command {
     Info {
         /// The start time of this bot instance.
         start_time: DateTime<Utc>,
+    },
+    /// Get the current karma of a subject.
+    #[cfg(feature = "persistence")]
+    Karma {
+        /// The subject.
+        subject: String,
+        /// A pool of connections to a database where the karma is stored.
+        pool: SqlitePool,
+    },
+    /// Get a list of the subjects with the most karma.
+    #[cfg(feature = "persistence")]
+    KarmaTop {
+        /// A pool of connections to a database where the karma is stored.
+        pool: SqlitePool,
+    },
+    /// Decrease the karma of a subject.
+    #[cfg(feature = "persistence")]
+    KarmaDecrement {
+        /// The subject.
+        subject: String,
+        /// A pool of connections to a database where the karma is stored.
+        pool: SqlitePool,
+    },
+    /// Increase the karma of a subject.
+    #[cfg(feature = "persistence")]
+    KarmaIncrement {
+        /// The subject.
+        subject: String,
+        /// A pool of connections to a database where the karma is stored.
+        pool: SqlitePool,
     },
     /// A request from a user for a response, to check if the bot is alive.
     Ping,
@@ -66,6 +102,14 @@ impl Command {
         match self {
             Command::Clap { input } => Ok(clap::clap(input)),
             Command::Info { start_time } => Ok(info::info(start_time).await),
+            #[cfg(feature = "persistence")]
+            Command::Karma { subject, pool } => karma::get(subject, pool).await,
+            #[cfg(feature = "persistence")]
+            Command::KarmaTop { pool } => karma::top(pool).await,
+            #[cfg(feature = "persistence")]
+            Command::KarmaDecrement { subject, pool } => karma::dec(subject, pool).await,
+            #[cfg(feature = "persistence")]
+            Command::KarmaIncrement { subject, pool } => karma::inc(subject, pool).await,
             Command::Ping => Ok(Response::Pong),
             Command::React { input } => react::react(input),
             Command::Sketchify { url_raw } => sketchify::sketchify(url_raw).await,
@@ -93,6 +137,28 @@ pub enum Response {
         /// The homepage of the bot.
         homepage: String,
     },
+    /// Response to a [Command::Karma].
+    #[cfg(feature = "persistence")]
+    Karma {
+        /// The subject.
+        subject: String,
+        /// The amount of karma the subject has.
+        karma: u32,
+    },
+    /// Response to a [Command::KarmaTop].
+    #[cfg(feature = "persistence")]
+    KarmaTop {
+        /// The top subjects, sorted by their karma.
+        top: Vec<karma::Karma>,
+        /// The amount of karma the subject has.
+        karma: u32,
+    },
+    /// Response to a [Command::KarmaDecrement].
+    #[cfg(feature = "persistence")]
+    KarmaDecrement,
+    /// Response to a [Command::KarmaIncrement].
+    #[cfg(feature = "persistence")]
+    KarmaIncrement,
     /// Response to a [Command::Ping].
     Pong,
     /// Response to a [Command::React].

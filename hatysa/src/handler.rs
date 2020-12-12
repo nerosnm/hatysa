@@ -19,6 +19,8 @@
 //! [execute]: hatysa::command::Command::execute
 
 use chrono::{DateTime, Utc};
+use lazy_static::lazy_static;
+use regex::Regex;
 use serenity::{
     async_trait,
     client::{Context, EventHandler},
@@ -92,6 +94,11 @@ impl Handler {
             }
         });
 
+        lazy_static! {
+            static ref SIMPLE_INC: Regex = Regex::new(r"^(\w+)\+\+$").unwrap();
+            static ref SIMPLE_DEC: Regex = Regex::new(r"^(\w+)\-\-$").unwrap();
+        }
+
         if let Some(tail) = tail {
             if let Some(tail) = tail.strip_prefix("clap").map(|tail| tail.trim()) {
                 Some(Command::Clap {
@@ -124,11 +131,49 @@ impl Handler {
                     input: tail.to_string(),
                     max_chars: None,
                 })
+            } else if !msg.is_private() {
+                // Commands that are not valid when run in a DM.
+                if let Some(tail) = tail.strip_prefix("karma").map(|tail| tail.trim()) {
+                    if tail.is_empty() {
+                        Some(Command::KarmaTop {
+                            pool: self.pool.clone(),
+                        })
+                    } else {
+                        Some(Command::Karma {
+                            subject: tail.to_string(),
+                            pool: self.pool.clone(),
+                        })
+                    }
+                } else {
+                    None
+                }
             } else {
+                // The command wasn't recognised.
                 None
             }
         } else {
-            None
+            // The message didn't start with the prefix.
+            if let Some(inc_captures) = SIMPLE_INC.captures(&msg.content) {
+                Some(Command::KarmaIncrement {
+                    subject: inc_captures
+                        .get(1)
+                        .expect("there should be a capture group 1 if the regex matched")
+                        .as_str()
+                        .to_string(),
+                    pool: self.pool.clone(),
+                })
+            } else if let Some(dec_captures) = SIMPLE_DEC.captures(&msg.content) {
+                Some(Command::KarmaDecrement {
+                    subject: dec_captures
+                        .get(1)
+                        .expect("there should be a capture group 1 if the regex matched")
+                        .as_str()
+                        .to_string(),
+                    pool: self.pool.clone(),
+                })
+            } else {
+                None
+            }
         }
     }
 }
