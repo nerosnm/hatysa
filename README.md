@@ -3,8 +3,8 @@
 [![Build Status]][builds.sr.ht]
 [![Discord]][discord.gg]
 
-[Build Status]: https://builds.sr.ht/~nerosnm/punch-clock/build.yml.svg
-[builds.sr.ht]: https://builds.sr.ht/~nerosnm/punch-clock/build.yml
+[Build Status]: https://builds.sr.ht/~nerosnm/hatysa/commits/build.yml.svg
+[builds.sr.ht]: https://builds.sr.ht/~nerosnm/hatysa/commits/build.yml
 [Discord]: https://img.shields.io/discord/784921066157768716?label=support
 [discord.gg]: https://discord.gg/sv6JpHtXCD
 
