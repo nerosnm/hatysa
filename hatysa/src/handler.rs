@@ -50,7 +50,7 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         info!("{} is connected!", ready.user.name);
 
-        ctx.set_activity(Activity::playing(&*format!(",react")))
+        ctx.set_activity(Activity::playing(&*format!("{}react", self.prefix)))
             .await;
     }
 

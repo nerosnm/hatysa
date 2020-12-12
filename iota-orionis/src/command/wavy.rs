@@ -21,12 +21,14 @@ fn wavify(input: String) -> Result<String, CommandError> {
         .map(|c| {
             let val = c as u32;
             match val {
-                0x0020 => std::char::from_u32(0x3000).ok_or(CommandError::Internal(
-                    "Invalid fullwidth space character".to_string(),
-                )),
-                0x0021..=0x007e => std::char::from_u32(val + 0xfee0).ok_or(CommandError::Internal(
-                    "fullwidth character equivalent should be valid".to_string(),
-                )),
+                0x0020 => std::char::from_u32(0x3000).ok_or_else(|| {
+                    CommandError::Internal("Invalid fullwidth space character".to_string())
+                }),
+                0x0021..=0x007e => std::char::from_u32(val + 0xfee0).ok_or_else(|| {
+                    CommandError::Internal(
+                        "fullwidth character equivalent should be valid".to_string(),
+                    )
+                }),
                 _ => Ok(c),
             }
         })

@@ -4,7 +4,7 @@ use super::Response;
 
 #[instrument]
 pub fn clap(input: String) -> Response {
-    let mut words = input.split(" ");
+    let mut words = input.split(' ');
 
     let clappified = words
         .next()
@@ -19,7 +19,7 @@ pub fn clap(input: String) -> Response {
             output.push_str(" 👏");
             output
         })
-        .unwrap_or_else(|| String::new());
+        .unwrap_or_else(String::new);
 
     let response = Response::Clap { output: clappified };
 

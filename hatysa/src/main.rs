@@ -37,7 +37,8 @@ use handler::Handler;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let filter = EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("info,hatysa=debug"));
+    let filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info,hatysa=debug"));
     let subscriber = FmtSubscriber::builder().with_env_filter(filter).finish();
 
     tracing::subscriber::set_global_default(subscriber)
@@ -46,7 +47,7 @@ async fn main() -> Result<()> {
     dotenv::dotenv().ok();
 
     let token = env::var("DISCORD_TOKEN").wrap_err("expected a token in the environment")?;
-    let prefix = env::var("HATYSA_PREFIX").unwrap_or(",".to_string());
+    let prefix = env::var("HATYSA_PREFIX").unwrap_or_else(|_| ",".to_string());
 
     let start_time = Utc::now();
     info!("starting hatysa at {}", start_time);

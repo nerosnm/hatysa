@@ -310,12 +310,13 @@ impl Context {
             Ok(sent_message) => {
                 debug!("successfully reported error");
 
-                if let Some(_) = sent_message
+                if sent_message
                     .await_reaction(&self.ctx)
                     .filter(|react| react.emoji == ReactionType::Unicode("🆗".to_string()))
                     .author_id(self.message.author.id)
                     .timeout(Duration::from_secs(5 * 60))
                     .await
+                    .is_some()
                 {
                     debug!(
                         "got an OK reaction on error message {}, deleting",
