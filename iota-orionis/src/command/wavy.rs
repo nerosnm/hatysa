@@ -1,6 +1,5 @@
 //! Convert text to vaporwave (fullwidth) text.
 
-
 use super::{CommandError, Response};
 
 #[instrument]

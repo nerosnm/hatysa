@@ -1,7 +1,6 @@
 //! The react command converts an ASCII-alphanumeric string into a series of
 //! reaction emojis, which it adds to a target message.
 
-
 use std::collections::HashMap;
 
 use super::{CommandError, Response};
