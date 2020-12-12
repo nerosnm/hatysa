@@ -17,7 +17,7 @@ use serenity::{
 
 use std::time::Duration;
 
-use hatysa::command::{Command, CommandError, Response};
+use iota_orionis::command::{Command, CommandError, Response};
 
 /// A task containing a command and context about the message that triggered the
 /// command.

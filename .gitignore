@@ -13,3 +13,4 @@
 # End of https://www.toptal.com/developers/gitignore/api/rust
 
 .env
+Cargo.lock

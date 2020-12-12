@@ -1,0 +1,27 @@
+[package]
+name = "hatysa"
+version = "0.3.0"
+authors = ["Søren Mortensen <soren@neros.dev>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+chrono = "^0.4"
+dotenv = "^0.15"
+eyre = "^0.6"
+thiserror = "^1.0"
+tracing = "^0.1"
+tracing-futures = "^0.2"
+tracing-subscriber = "^0.2"
+
+[dependencies.iota-orionis]
+path = "../iota-orionis"
+
+[dependencies.serenity]
+version = "^0.9"
+default-features = false
+features = ["client", "gateway", "rustls_backend", "model", "collector"]
+
+[dependencies.tokio]
+version = "^0.2"
+features = ["full"]

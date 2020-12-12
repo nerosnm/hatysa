@@ -1,6 +1,5 @@
 //! Insert clapping emojis between every word of the input text.
 
-
 use super::Response;
 
 #[instrument]

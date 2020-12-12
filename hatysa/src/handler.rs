@@ -26,7 +26,7 @@ use serenity::{
 };
 use tracing::{Instrument, Level};
 
-use hatysa::command::Command;
+use iota_orionis::command::Command;
 
 use crate::task::Task;
 

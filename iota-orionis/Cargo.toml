@@ -1,0 +1,16 @@
+[package]
+name = "iota-orionis"
+version = "0.3.0"
+authors = ["Søren Mortensen <soren@neros.dev>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+chrono = "^0.4"
+eyre = "^0.6"
+rand = "^0.7"
+reqwest = "^0.10"
+thiserror = "^1.0"
+tracing = "^0.1"
+tracing-futures = "^0.2"
+url = "^2.2"

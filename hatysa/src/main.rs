@@ -1,3 +1,25 @@
+//! Hatysa is a Discord bot that implements a few fun commands.
+//!
+//! ## Usage
+//!
+//! To run the bot, you'll need to provide a Discord token (obtainable from the
+//! [Discord Developer Portal](https://discord.com/developers)), as follows:
+//!
+//! ```bash
+//! $ DISCORD_TOKEN="<token>" cargo run
+//! ```
+//!
+//! The prefix can be changed from the default (`,`) using `HATYSA_PREFIX`, and
+//! you might also want to [change the tracing subscriber filter][sub] to
+//! customise what log messages are printed out:
+//!
+//! [sub]:
+//! ../tracing_subscriber/fmt/index.html#filtering-events-with-environment-variables
+//!
+//! ```bash
+//! $ DISCORD_TOKEN="<token>" HATYSA_PREFIX="!" RUST_LOG="info,hatysa=debug" cargo run
+//! ```
+
 #[macro_use]
 extern crate tracing;
 
