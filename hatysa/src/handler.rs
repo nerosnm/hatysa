@@ -24,6 +24,7 @@ use serenity::{
     client::{Context, EventHandler},
     model::{channel::Message, gateway::Activity, gateway::Ready},
 };
+use sqlx::sqlite::SqlitePool;
 use tracing::{Instrument, Level};
 
 use iota_orionis::command::Command;
@@ -43,6 +44,8 @@ pub struct Handler {
     pub prefix: String,
     /// The date and time when this handler started running.
     pub start_time: DateTime<Utc>,
+    /// A database connection pool.
+    pub pool: SqlitePool,
 }
 
 #[async_trait]

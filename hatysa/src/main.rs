@@ -29,6 +29,7 @@ pub mod task;
 use chrono::Utc;
 use eyre::{Result, WrapErr};
 use serenity::prelude::*;
+use sqlx::sqlite::SqlitePool;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use std::env;
@@ -49,11 +50,25 @@ async fn main() -> Result<()> {
     let token = env::var("DISCORD_TOKEN").wrap_err("expected a token in the environment")?;
     let prefix = env::var("HATYSA_PREFIX").unwrap_or_else(|_| ",".to_string());
 
+    let db_url = env::var("DATABASE_URL").unwrap_or_else(|_| ":memory:".to_string());
+    let pool = SqlitePool::connect(&db_url)
+        .await
+        .expect("unable to connect to database");
+
+    sqlx::migrate!()
+        .run(&pool)
+        .await
+        .expect("unable to run migrations");
+
     let start_time = Utc::now();
     info!("starting hatysa at {}", start_time);
 
     let mut client = Client::builder(&token)
-        .event_handler(Handler { prefix, start_time })
+        .event_handler(Handler {
+            prefix,
+            start_time,
+            pool,
+        })
         .await?;
 
     if let Err(why) = client.start().await {
