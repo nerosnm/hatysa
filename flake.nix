@@ -52,7 +52,7 @@
       apps.hatysa = flake-utils.lib.mkApp {
         drv = packages.hatysa;
       };
-      defaultApp = apps.haytsa;
+      defaultApp = apps.hatysa;
 
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
