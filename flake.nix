@@ -43,8 +43,10 @@
         pname = "hatysa";
         root = ./.;
         nativeBuildInputs = with pkgs; [
-          openssl
           pkg-config
+        ];
+        buildInputs = with pkgs; [
+          openssl
         ];
       };
       defaultPackage = packages.hatysa;
