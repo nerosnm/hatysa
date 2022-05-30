@@ -39,22 +39,26 @@
     in
     rec
     {
-      packages.hatysa = naersk-lib.buildPackage {
-        pname = "hatysa";
-        root = ./.;
-        nativeBuildInputs = with pkgs; [
-          pkg-config
-        ];
-        buildInputs = with pkgs; [
-          openssl
-        ];
+      packages = rec {
+        hatysa = naersk-lib.buildPackage {
+          pname = "hatysa";
+          root = ./.;
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+          ];
+          buildInputs = with pkgs; [
+            openssl
+          ];
+        };
+        default = hatysa;
       };
-      defaultPackage = packages.hatysa;
 
-      apps.hatysa = flake-utils.lib.mkApp {
-        drv = packages.hatysa;
+      apps = rec {
+        hatysa = flake-utils.lib.mkApp {
+          drv = packages.hatysa;
+        };
+        default = hatysa;
       };
-      defaultApp = apps.hatysa;
 
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [

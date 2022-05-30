@@ -116,13 +116,13 @@ impl Handler {
                 Some(Command::Wavy {
                     input: tail.to_string(),
                 })
-            } else if let Some(tail) = tail.strip_prefix("zalgo").map(|tail| tail.trim()) {
-                Some(Command::Zalgo {
-                    input: tail.to_string(),
-                    max_chars: None,
-                })
             } else {
-                None
+                tail.strip_prefix("zalgo")
+                    .map(|tail| tail.trim())
+                    .map(|tail| Command::Zalgo {
+                        input: tail.to_string(),
+                        max_chars: None,
+                    })
             }
         } else {
             None
