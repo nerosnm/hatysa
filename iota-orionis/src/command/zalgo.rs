@@ -26,7 +26,7 @@ fn zalgify(input: String, per_char: usize) -> String {
         .flat_map(|c| {
             let mut rng = rand::thread_rng();
             let combiners = (0..per_char).map(|_| {
-                let val = rng.gen_range(0x300, 0x36f);
+                let val = rng.gen_range(0x300..0x36f);
                 unsafe { std::char::from_u32_unchecked(val) }
             });
 

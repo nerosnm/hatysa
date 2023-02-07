@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
     let start_time = Utc::now();
     info!("starting hatysa at {}", start_time);
 
-    let mut client = Client::builder(&token)
+    let mut client = Client::builder(&token, GatewayIntents::default())
         .event_handler(Handler { prefix, start_time })
         .await?;
 
