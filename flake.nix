@@ -87,6 +87,7 @@
           packages = with pkgs; [
             cargo2nix
             nixpkgs-fmt
+            libiconv
           ];
         };
 
