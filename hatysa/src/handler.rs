@@ -78,6 +78,8 @@ impl Handler {
     /// Attempt to parse a message as a command. If the message does not contain
     /// a valid command, `None` is returned.
     async fn interpret_command(&self, msg: &Message) -> Option<Command> {
+        debug!("interpreting command");
+
         // Non-private messages must have a prefix on them, but it's optional
         // for private messages, so if we don't find a prefix, check if it was a
         // private message and allow it if it was.

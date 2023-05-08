@@ -52,9 +52,14 @@ async fn main() -> Result<()> {
     let start_time = Utc::now();
     info!("starting hatysa at {}", start_time);
 
-    let mut client = Client::builder(&token, GatewayIntents::default())
-        .event_handler(Handler { prefix, start_time })
-        .await?;
+    let mut client = Client::builder(
+        &token,
+        GatewayIntents::default()
+            | GatewayIntents::MESSAGE_CONTENT
+            | GatewayIntents::GUILD_MESSAGES,
+    )
+    .event_handler(Handler { prefix, start_time })
+    .await?;
 
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
