@@ -28,7 +28,7 @@ pub async fn info(start_time: DateTime<Utc>) -> Response {
     let response = Response::Info {
         version: VERSION.to_string(),
         uptime: (days, hours, minutes, seconds),
-        homepage: "https://sr.ht/~nerosnm/hatysa".to_string(),
+        homepage: "https://github.com/nerosnm/hatysa".to_string(),
     };
 
     debug!(?response);
