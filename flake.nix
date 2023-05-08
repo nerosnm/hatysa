@@ -9,57 +9,58 @@
     fenix.inputs.nixpkgs.follows = "nixpkgs";
 
     cargo2nix.url = "github:cargo2nix/cargo2nix/unstable";
-    cargo2nix.inputs.nixpkgs.follows = "nixpkgs";
     cargo2nix.inputs.flake-utils.follows = "flake-utils";
+    cargo2nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
     { self
     , nixpkgs
     , flake-utils
-    , fenix
-    , cargo2nix
+    , ...
     } @ inputs:
-    flake-utils.lib.eachDefaultSystem (system:
     let
-      overlays = [
-        cargo2nix.overlays.default
-        fenix.overlays.default
+      pkgsFor = system: import nixpkgs {
+        inherit system;
+        overlays = [
+          inputs.cargo2nix.overlays.default
+          inputs.fenix.overlays.default
 
-        (final: prev: {
-          rust-toolchain =
-            let
-              inherit (final) fenix;
-              inherit (final.lib.strings) fileContents;
+          (final: prev: {
+            rust-toolchain =
+              let
+                inherit (final.lib.strings) fileContents;
 
-              # Use the same stable version for the main toolchain as
-              # specified in the `rust-toolchain` file, so it's always the
-              # same for Nix and non-Nix users.
-              stable = fenix.toolchainOf {
-                channel = fileContents ./rust-toolchain;
-                sha256 = "sha256-riZUc+R9V35c/9e8KJUE+8pzpXyl0lRXt3ZkKlxoY0g=";
-              };
-            in
-            fenix.combine [
-              # Nightly rustfmt first so it overrides the one from the main
-              # toolchain.
-              fenix.latest.rustfmt
+                stableFor = target: target.toolchainOf {
+                  channel = fileContents ./rust-toolchain;
+                  sha256 = "sha256-eMJethw5ZLrJHmoN2/l0bIyQjoTX1NsvalWSscTixpI=";
+                };
 
-              # Make sure to include the `rust-std` component, then include the
-              # main toolchain last.
-              stable.rust-std
-              stable.toolchain
-            ];
-        })
-      ];
+                rustfmt = final.fenix.latest.rustfmt;
+              in
+              final.fenix.combine [
+                rustfmt
+                (stableFor final.fenix).toolchain
+              ];
+          })
 
-      pkgs = import nixpkgs {
-        inherit system overlays;
+          (final: prev: {
+            cargo2nix = inputs.cargo2nix.packages.${system}.default;
+          })
+        ];
       };
 
-      formatPkgs = with pkgs; [
-        nixpkgs-fmt
+      supportedSystems = with flake-utils.lib.system; [
+        aarch64-darwin
+        x86_64-darwin
+        x86_64-linux
       ];
+
+      inherit (flake-utils.lib) eachSystem;
+    in
+    eachSystem supportedSystems (system:
+    let
+      pkgs = pkgsFor system;
 
       rustPkgs = pkgs.rustBuilder.makePackageSet {
         packageFun = import ./Cargo.nix;
@@ -83,9 +84,10 @@
       devShells = {
         default = rustPkgs.workspaceShell {
           name = "hatysa";
-          packages = [
-            cargo2nix.packages."${system}".default
-          ] ++ formatPkgs;
+          packages = with pkgs; [
+            cargo2nix
+            nixpkgs-fmt
+          ];
         };
 
         # Sometimes it's useful to have this extra devShell, because there's a
@@ -101,19 +103,23 @@
         backup = pkgs.mkShell {
           name = "backup";
           packages = with pkgs; [
+            cargo2nix
+            nixpkgs-fmt
             rust-toolchain
-            cargo2nix.packages."${system}".default
-          ] ++ formatPkgs;
+          ];
         };
       };
 
       formatter = pkgs.nixpkgs-fmt;
 
       checks = {
-        format = pkgs.runCommand "check-nix-format" { buildInputs = formatPkgs; } ''
-          ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check ${./.}
-          touch $out
-        '';
+        format = pkgs.runCommand
+          "check-nix-format"
+          { buildInputs = [ pkgs.nixpkgs-fmt ]; }
+          ''
+            ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check ${./.}
+            touch $out
+          '';
       };
     });
 }
