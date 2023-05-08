@@ -8,7 +8,7 @@
     fenix.url = "github:nix-community/fenix/main";
     fenix.inputs.nixpkgs.follows = "nixpkgs";
 
-    cargo2nix.url = "github:cargo2nix/cargo2nix/unstable";
+    cargo2nix.url = "github:cargo2nix/cargo2nix";
     cargo2nix.inputs.flake-utils.follows = "flake-utils";
     cargo2nix.inputs.nixpkgs.follows = "nixpkgs";
   };
